@@ -1,4 +1,4 @@
-import Model.Calculator;//uhughguy
+package lesson_3;
 
 import java.util.Scanner;
 
@@ -18,9 +18,9 @@ public class CalculatorTest{
                 int firstNumber = scan.nextInt();// считывает целое число с потока ввода и сохраняем в переменную
                 calc.setFirstNumber(firstNumber);
             }else
-                {System.out.println("Error: not int!");
-                    continue;//прервет данный виток цикла while и запустит новый виток сначала
-                }
+            {System.out.println("Error: not int!");
+                continue;//прервет данный виток цикла while и запустит новый виток сначала
+            }
 
 
             System.out.print("Input arithmetic operation: ");
@@ -30,13 +30,13 @@ public class CalculatorTest{
 
 
             System.out.print("Input second number (int): ");
-                if(scan.hasNextInt()) {
-                    int secondNumber = scan.nextInt();
-                    calc.setSecondNumber(secondNumber);
-                }else {
-                    System.out.println("Error: not int!");
-                    continue;//прервет данный виток цикла while и запустит новый виток сначала
-                }
+            if(scan.hasNextInt()) {
+                int secondNumber = scan.nextInt();
+                calc.setSecondNumber(secondNumber);
+            }else {
+                System.out.println("Error: not int!");
+                continue;//прервет данный виток цикла while и запустит новый виток сначала
+            }
 
 
 
