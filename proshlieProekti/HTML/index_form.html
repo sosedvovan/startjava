@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Документ без названия</title>
+	
+<link href="css/style — form.css" text="text/css" rel="stylesheet">	
+</head>
+<body>
+
+<div id="wrapper">	<!--тэг обертка чтобы ограничить ширину формы-->
+	
+<form action="formdata.php" method="post" name="form1"><!-- action это выбор обработчика, name- имя формы для обработчика-->
+	
+<fieldset>	<!-- fieldset это декоративное обрамление-->
+<legend>Ввод личных данных</legend>	<!-- <legend> это подпись на декоративном обрамлении-->
+<p class="question"><label for="name">Введите ваше имя (max 10 символов)</p>
+<p><input class="input" type="text" name="name" id="name" size="30" maxlength="10"></label></p>	
+<p class="question"><label for="password">Введите ваш пароль (max 10 символов)</label></p>
+<p><input class="input" type="password" name="password" id="password" size="30" maxlength="10"></p>	
+</fieldset>
+	
+	
+	
+<fieldset>	
+<legend>Вопросы</legend>		
+<p class="question">Любите ли вы экономить время?</p>
+<p><lable>Да<input type="radio" name="time" value="yes" checked></lable><lable>Нет<input type="radio" name="time" value="no"></lable></p>
+
+	
+	
+<p class="question"> Какими инструментами для экономии времени Вы пользуетесь? </p>	
+<p>
+<lable><input type="checkbox" name="ez" disabled>Ежедневник</lable>	<!-- disabled это временная блокировка элемента-->
+<lable><input type="checkbox" name="hr" checked>Хронометраж</lable>	<!-- checked это выбор по умолчанию-->
+<lable><input type="checkbox" name="sv">Свои наработки</lable>		
+</p>
+	
+	
+	
+<p class="question"><label for="sleep">Сколько часов в день вы спите? (можно выбрать несколько вариантов)</label></p>
+<p>
+<select name="sleep" size="0" multiple id="sleep">	<!-- size это кол-во вариантов кот одновременно выпадают из списка-->
+<option>5</option>						<!-- name это имя переменной для обработчика-->
+<option>6</option>						<!-- multiple в <select> это возможность выбрать сразу несколько. лучше без него-->
+<option value="seven">7</option> <!-- value это значение для переменной name (если надо не 7)-->
+<option selected>8</option>	<!-- selected в <option> это выбор по умолчанию-->
+<option>8+</option>	
+</select>	
+</p>
+</fieldset>
+	
+	
+<p class="question tp"><label for="text">Поделитесь своими наработками в текстовой области</label></p>	
+<p><textarea name="text" cols="50" rows="6" id="text" readonly>Первоначальный текст</textarea></p>	<!-- cols, rows это размер текстовой области символах  readonly-это ограничение только для чтения из этой области-->
+	
+	
+<p><input type="reset" name="reset" value="Сброс!"><input type="submit" name="submit" value="Отправить!"></p><!-- это 2-е кнопки сброс и отправить-->
+<p><input type="image" src="images/blueButton.jpg" name="imageButton"></p>	<!-- это кнопка-картинка-отправить!-->
+<p><input type="button" value="Просто кнопка для скрипта" name="button"></p>	
+	
+</form>	
+
+</div>	
+</body>
+</html>

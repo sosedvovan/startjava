@@ -1,0 +1,42 @@
+body{
+	/*background-color: #c3c3c3/*задали цвет бэкграунду*/
+	background-image: url(../images/pattern.png); /*задали картинку-мозайку бэкграунду*/
+	/*background-repeat: no-repeat;/*запретили повторение  картинки-мозайки на бэкграунде (repeat-x можно только по x повторят*/
+	margin: 0;
+	padding: 0;
+}
+#mainDiv{
+	width: 800px;
+	height: 1000px;
+	margin: 30px auto;/*выравняли блок по центру*/
+	outline: 0px solid #000000; /*css будет показывать контур элемента для удобства верстки. не влияет на разменры блока*/
+	background-image: url(../images/bg_s.jpg); /*задали картинку-мозайку бэкграунду*/
+	background-repeat:repeat-x; /*растиражировали картинку-мозайку по x*/
+	
+}
+
+#mainh1{
+	text-align: center;/*выравняли текст по центру блока h1 */
+	outline: 0px solid #000000; 
+	padding-top: 180px;/*задали внутренний верхний отступ чтобы текст был в центре фона */
+	/*с margin такое не прокатит тк будет конфликт полей и верхнее поле не оттолкнет текст а просто уйдет вверх на боди */
+	font: 36px Verdana;/*задали шрифт и размер тексту */
+	background-image: url(../images/logo.png);/*поставили на фон тэга h1 картинку (она встанет в лев-верхн угол по умолчан)*/
+	background-repeat: no-repeat;/*запретили картинки тиражироваться */
+	background-position:134px 187px; /*координаты лев-верхн угла по горизонтали и по вертикали */
+}
+
+#wrapper{
+outline: 2px solid #F80A0E;
+background-image: url(../images/tel.jpg);
+background-repeat: no-repeat;
+background-position:0px 120px;
+background-attachment: fixed;/*закрепили фоновую картинку- те при скроллинге она остаётся одном месте(-не двигается-) по координатам указанных в background-position, только эти координаты от угла браузера теперь отсчитываются */
+	
+/*background: url(../images/tel.jpg) no-repeat fixed 0px 120px;   /*так можно делать краткую запись свойств  */
+}
+
+
+
+
+

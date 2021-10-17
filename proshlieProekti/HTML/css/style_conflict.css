@@ -1,0 +1,32 @@
+#div1{
+margin: 0 0 30px 0;/* в случае когда p следом за div действовать будет отступ margin который больше  */
+padding: 0;	/* добавление рамки в этом случае не поможет */
+}
+
+#p1{
+margin: 20px 0 0 0;
+padding: 0;		
+}
+
+
+
+#div2{
+margin: 30px 0 0 0;
+padding: 0;
+border: 2px solid #333333 /* в случае когда p вложен в div рамка поможет избежать конфликта полей margin */
+}
+/* или же надо пользоваться padding */
+#p2{
+margin: 20px 0 0 0;
+padding: 0;
+border: 2px solid #CC0000;
+}
+
+
+
+#span1{
+	border: 1px solid #CC0000;
+}
+
+
+
