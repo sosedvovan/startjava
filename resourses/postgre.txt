@@ -1,0 +1,40 @@
+00821821
+
+--- команда для исправления кирилицы--- psql \! chcp 1251  ---
+https://iu5bmstu.ru/index.php/PostgreSQL_-_Кириллица_в_psql_под_Windows
+
+sudo -u postgres psql — запуск psql в Linux
+psql -U postgres — запуск psql из терминала в Windows у меня не сработало
+
+CREATE DATABASE college;
+\?  ->  \connect --- справка по подключению к db
+\c college; --- подключится к дб
+\? -> \table  ---- найти в справке как посмотреть таблицы
+\d  --- посмотреть на таблици в дб к которой подключились
+CREATE TABLE Students (
+id SERIAL PRIMARY KEY,
+firstName TEXT,
+lastName TEXT,
+groupName char(8),
+subject TEXT,
+mark INTEGER);
+
+\d --- проверим что получилось
+\d Students --- инфо по конкретной таблици
+
+INSERT INTO Students (firstName, lastName, groupName, subject, mark)
+VALUES ('Эльдар', 'Акалов', 'П - 11.1', 'Java', '65'),
+('Сергей', 'Виноградов', 'П - 11.1', 'Java', '47');
+
+SELECT * FROM Students;
+SELECT * FROM Students WHERE mark >= '50';
+SELECT * FROM Students WHERE mark = (SELECT MAX(mark) FROM Students);
+AVG ---это агрегатная функция- среднее по полю
+SELECT * FROM Students ORDER BY mark DESC;  -- сортировка по полю mark--- сначала большие значения
+SELECT * FROM Students WHERE groupName = 'П - 11.1' AND firstName = 'Сергей' ORDER BY lastName;
+
+UPDATE Students SET groupName = 'C - 11.3' WHERE lastName = 'Акалов';
+
+DELETE FROM Students WHERE groupName = 'C - 11.3';
+
+
