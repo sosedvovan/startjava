@@ -74,6 +74,8 @@ git push -u origin master
 Написать в консоли --------- git rm -r --cached out -------, а после занести папку out в
 файл .gitignore
 
+ЗЕЛЕНУЮ ПАПКУ basejava/.idea/    УДАЛИЛ ИЗ ИНДЕКСА СЛЕД. ОБРАЗОМ:   ----- git restore --staged basejava/.idea/  -----
+
 
 
 

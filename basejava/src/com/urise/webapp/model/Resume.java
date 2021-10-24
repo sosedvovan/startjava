@@ -1,6 +1,6 @@
 package com.urise.webapp.model;
 
-//implements Comparable<Resume> говорит о том что объекты этого класса можно сравнивать
+//implements Comparable<Resume> говорит о том что объекты этого класса можно сравнивать-
 //чтобы работал метод Arrays.binarySearch()-поиск индекса по значению методом бинарного деления на 2
 //реализуем метод compareTo() этого интерфейса и подправим его вручную. см ниже.
 public class Resume implements Comparable<Resume>{
@@ -22,7 +22,7 @@ public class Resume implements Comparable<Resume>{
         if (o == null || getClass() != o.getClass()) return false;//если подали null вместо объекта
                                                                     // или объект другого класса
 
-        Resume resume = (Resume) o;//приводим Object к нашему классу
+        Resume resume = (Resume) o;//приводим Object o к нашему классу
 
         return uuid != null ? uuid.equals(resume.uuid) : resume.uuid == null;//проверка поля объекта на null
                                                                               // и сравнение поля обекта
@@ -39,7 +39,7 @@ public class Resume implements Comparable<Resume>{
     }
 
     @Override
-    public int compareTo(Resume o) { //реализовали тк implements Comparable<>
+    public int compareTo(Resume o) { //реализовали тк этот класс implements Comparable<>
         return uuid.compareTo(o.uuid);//это дописали руками наподобии equals
     }
 }
