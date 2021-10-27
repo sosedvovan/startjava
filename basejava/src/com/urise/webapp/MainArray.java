@@ -42,14 +42,14 @@ public class MainArray {
                     System.out.println(ARRAY_STORAGE.size());
                     break;
                 case "save"://сохранение в массиве:
-                    r = new Resume();//создали новый объект
-                    r.setUuid(uuid);//в его сеттер послали второе слово команды
+                    r = new Resume(uuid);//создали новый объект
+                    //r.setUuid(uuid);//в его сеттер послали второе слово команды//сеттер удалили тк стали использовать конструктор
                     ARRAY_STORAGE.save(r);//этот новый объект отправили в метод save() класса ArrayStorage(кот не сортирован)
                     printAll();
                     break;
                 case "update":
-                    r = new Resume();//та же логика, что и при save
-                    r.setUuid(uuid);
+                    r = new Resume(uuid);//та же логика, что и при save
+                    //r.setUuid(uuid);//сеттер удалили тк стали использовать конструктор
                     ARRAY_STORAGE.update(r);
                     printAll();
                     break;

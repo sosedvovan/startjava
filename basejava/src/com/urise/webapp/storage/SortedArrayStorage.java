@@ -19,8 +19,11 @@ public class SortedArrayStorage extends AbstractArrayStorage{
     //если элемент не найден- возвращает любое отрицательное число
     @Override
     protected int getIndex(String uuid) {//получаем значение поля
-        Resume searchKey = new Resume();//создаем новый объект
-        searchKey.setUuid(uuid);//новому объекту присваеваем искомое значение поля из аргументов метода
+        Resume searchKey = new Resume(uuid);//создаем новый объект
+
+        //сеттер удалим тк стали использовать конструктор
+        //searchKey.setUuid(uuid);//новому объекту присваеваем искомое значение поля из аргументов метода
+
         return Arrays.binarySearch(storage, 0, size, searchKey);
         //где Arrays.binarySearch() уже имеющийся в java метод класса  Arrays для нахождения индекса по значению
         //методом деления на 2. на вход надо подать наш массив, интервал поиска(0-size) и объект содержащий

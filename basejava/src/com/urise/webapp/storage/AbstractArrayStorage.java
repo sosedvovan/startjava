@@ -1,5 +1,8 @@
 package com.urise.webapp.storage;
 
+import com.urise.webapp.exception.ExistStorageException;
+import com.urise.webapp.exception.NotExistStorageException;
+import com.urise.webapp.exception.StorageException;
 import com.urise.webapp.model.Resume;
 
 import java.util.Arrays;
@@ -36,7 +39,12 @@ public abstract class AbstractArrayStorage implements Storage{//абстракт
         int index = getIndex(r.getUuid());//getIndex вернет индекс по значению
         //если наш метод getIndex() вернет -1, или отрицат число(от сортированной реализации) то такого объекта в массиве нет:
         if (index < 0) {
-            System.out.println("Resume: " + r.getUuid() + " not exist");
+            //тк мы создали свои эксэпшены, если такого объекта нет- бросим эксепшен:
+            //System.out.println("Resume: " + r.getUuid() + " not exist");//вместо sout:
+            throw new NotExistStorageException(r.getUuid());
+
+
+
         } else {
             storage[index] = r;//новый объект r создаем в тестовом-майн классе перед вызовом этого метода
         }
@@ -79,9 +87,13 @@ public abstract class AbstractArrayStorage implements Storage{//абстракт
         //или если наш метод getIndex() вернет -1, или отрицат число(из сортированного хранилища) то такого объекта в массиве нет
         //причем модуль отрицательного числа будет равен возможному положению объекта в отсортированном массиве
         if (index > 0) {//если элемент с таким значением уже есть, то выведем сообщение:
-            System.out.println("Resume: " + r.getUuid() + " alredy exist");
-        } else if (size >= STORAGE_LIMIT) {//проверка-что в массиве еще есть свободные ячейки
-            System.out.println("Storage overflow");
+            //System.out.println("Resume: " + r.getUuid() + " alredy exist");
+            throw new ExistStorageException(r.getUuid());//это подкласс типа RuntimeException и его не нужно
+            // включать в список throws.
+        } else if (size == STORAGE_LIMIT) {//проверка-что в массиве еще есть свободные ячейки
+            //System.out.println("Storage overflow");
+            //для этой ситуации не будем создавать специальное исключение, а бросим родительское:
+            throw new StorageException("Storage overflow", r.getUuid());
         } else {// если элемента с таким значением в массиве нет и в массиве есть свободные ячейки:
             insertElement(r, index);//этот абстрактный метод реализуем в дочках(по разному)
             //непонятно-зачем передаем index. понятно: index используем только в методе сортированного класса
@@ -101,7 +113,8 @@ public abstract class AbstractArrayStorage implements Storage{//абстракт
         // сначала проверка есть ли такое резюме в бд- чтобы оно было: //getIndex вернет индекс по значению
         int index = getIndex(uuid);//если наш метод getIndex() вернет -1, или отрицат число то такого объекта в массиве нет
         if (index < 0) {//тк кроме -1 может вернуться просто отрицательное число из отсортированного массива
-            System.out.println("Resume: " + uuid + " not exist");
+            //System.out.println("Resume: " + uuid + " not exist");
+            throw new NotExistStorageException(uuid);
         } else {
             fillDeletedElement(index);//этот абстрактный метод реализуем в дочках(по разному)
             storage[size - 1] = null;//а на место последнего элемента запишем null
@@ -137,8 +150,9 @@ public abstract class AbstractArrayStorage implements Storage{//абстракт
 
         int index = getIndex(uuid);//находит индекс по значению. если наш метод getIndex() вернет -1, или отрицат число то такого объекта в массиве нет
         if (index < 0) {//тк кроме -1 может вернуться просто отрицательное число из отсортированного массива
-            System.out.println("Resume: " + uuid + " not exist");
-            return null;
+            //System.out.println("Resume: " + uuid + " not exist");
+            throw new NotExistStorageException(uuid);
+           // return null;
         }
         return storage[index];//мы завели int index чтобы в этом(втором) return'е второй раз не запускать getIndex(),
         // те чтобы второй раз не перебирать весь массив (сделали так: рефактор-экстракт)

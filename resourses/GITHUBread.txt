@@ -75,6 +75,8 @@ git push -u origin master
 файл .gitignore
 
 ЗЕЛЕНУЮ ПАПКУ basejava/.idea/    УДАЛИЛ ИЗ ИНДЕКСА СЛЕД. ОБРАЗОМ:   ----- git restore --staged basejava/.idea/  -----
+КРАСНЫЙ ФАЙЛ basejava/basejava.iml ЧТОБЫ ВООБЩЕ НЕ ПОЯВЛЯЛСЯ  ---  git restore basejava/basejava.iml  ----
+КРАСНУЮ ПАПКУ в гитигнор и всё)
 
 
 

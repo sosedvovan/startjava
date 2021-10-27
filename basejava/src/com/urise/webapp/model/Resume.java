@@ -1,20 +1,33 @@
 package com.urise.webapp.model;
 
+import java.util.UUID;
+
 //implements Comparable<Resume> говорит о том что объекты этого класса можно сравнивать-
 //чтобы работал метод Arrays.binarySearch()-поиск индекса по значению методом бинарного деления на 2
 //реализуем метод compareTo() этого интерфейса и подправим его вручную. см ниже.
 public class Resume implements Comparable<Resume>{
 
     //Unique identifier
-    private String uuid;
+    private final String uuid;//сделали поле final -> обязат. нужен конструктор, а сеттер надо удалить
+
+    public Resume(){//это конструктор без параметров с автогенерацией uuid
+        this(UUID.randomUUID().toString());//с пом. this он подает автосгенерированную строку
+                                            //в конструктор с параметрами(который ниже)
+                                            //но мы его не исспользуем пока-он бледный
+    }
+
+    public Resume(String uuid) {
+        this.uuid = uuid;
+    }
 
     public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
+    //сеттер удалили тк поле uuid сделали final и теперь можно только через конструктор с ним работать
+    //public void setUuid(String uuid) {
+    //    this.uuid = uuid;
+   // }
 
     @Override
     public boolean equals(Object o) {
