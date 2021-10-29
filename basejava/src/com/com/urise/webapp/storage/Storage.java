@@ -1,6 +1,7 @@
-package com.urise.webapp.storage;
+package com.com.urise.webapp.storage;
 
-import com.urise.webapp.model.Resume;
+import com.com.urise.webapp.model.Resume;
+
 
 //КОНТРАКТ:
 public interface Storage { //создадим интерфейс тк принято обращаться к классам через интерфейс. из класса ArrayStorage

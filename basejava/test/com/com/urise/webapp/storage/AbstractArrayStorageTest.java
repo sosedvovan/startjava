@@ -1,14 +1,10 @@
-package com.urise.webapp.storage;
+package com.com.urise.webapp.storage;
 
-import com.urise.webapp.exception.NotExistStorageException;
-import com.urise.webapp.model.Resume;
-import com.urise.webapp.storage.ArrayStorage;
-import com.urise.webapp.storage.Storage;
+import com.com.urise.webapp.exception.NotExistStorageException;
+import com.com.urise.webapp.model.Resume;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public abstract class AbstractArrayStorageTest {
 

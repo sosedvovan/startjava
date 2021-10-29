@@ -1,6 +1,8 @@
-package com.urise.webapp;
+package com.com.urise.webapp;
 
-import com.urise.webapp.model.Resume;
+
+
+import com.com.urise.webapp.model.Resume;
 
 import java.lang.reflect.Field;
 

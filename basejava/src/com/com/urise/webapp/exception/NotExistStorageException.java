@@ -1,4 +1,4 @@
-package com.urise.webapp.exception;
+package com.com.urise.webapp.exception;
 
 /**
  * этот эксепшн будем выбрасывать когда объект не найден(для update())

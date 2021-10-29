@@ -1,6 +1,8 @@
-package com.urise.webapp.storage;
+package com.com.urise.webapp.storage;
 
-import com.urise.webapp.model.Resume;
+
+
+import com.com.urise.webapp.model.Resume;
 
 import java.util.Arrays;
 

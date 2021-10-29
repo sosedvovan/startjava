@@ -1,8 +1,10 @@
-package com.urise.webapp;
+package com.com.urise.webapp;
 
-import com.urise.webapp.model.Resume;
-import com.urise.webapp.storage.ArrayStorage;
-import com.urise.webapp.storage.Storage;
+
+
+import com.com.urise.webapp.model.Resume;
+import com.com.urise.webapp.storage.ArrayStorage;
+import com.com.urise.webapp.storage.Storage;
 
 import java.io.BufferedReader;
 import java.io.IOException;

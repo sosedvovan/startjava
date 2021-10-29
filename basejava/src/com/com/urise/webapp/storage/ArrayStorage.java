@@ -1,8 +1,10 @@
-package com.urise.webapp.storage;
+package com.com.urise.webapp.storage;
 
-import com.urise.webapp.model.Resume;
+
 
 //Это вариант массива- хранилища без сортировки внутри.
+
+import com.com.urise.webapp.model.Resume;
 
 public class ArrayStorage extends AbstractArrayStorage {//так же implements Storage тк AbstractArrayStorage implements Storage
 

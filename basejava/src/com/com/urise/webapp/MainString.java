@@ -1,4 +1,4 @@
-package com.urise.webapp;
+package com.com.urise.webapp;
 
 public class MainString {
     public static void main(String[] args) {
