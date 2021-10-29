@@ -36,3 +36,16 @@ public class MainReflection {
 //чекед эксепшены можно оборачивать в рантайм эксепшены или в другие
 
 //так же через рефлекшн можно брать анотоции у объекта, ту-стринг и др методы класса
+
+/**
+ * Руководство по аннотациям в Java:
+ * https://topjava.ru/blog/rukovodstvo-po-annotatsiyam-v-java-i-mekhanizmu-ikh-raboty
+ *
+ * Reflection для начинающих, видео от BoostBrain:
+ *https://www.youtube.com/watch?v=XJQuBXWADZg
+ *
+ * Руководство по Java Reflection API:
+ * https://javadevblog.com/polnoe-rukovodstvo-po-java-reflection-api-refleksiya-na-primerah.html
+ *
+ * Алишев- Продвинутая Java.
+ */

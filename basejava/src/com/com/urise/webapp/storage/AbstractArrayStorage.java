@@ -7,7 +7,7 @@ import com.urise.webapp.model.Resume;
 
 import java.util.Arrays;
 
-public abstract class AbstractArrayStorage implements Storage{//абстрактные классы могут не имплементировать методы интерфейса
+public abstract class AbstractArrayStorage implements Storage {//абстрактные классы могут не имплементировать методы интерфейса
 
     //все поля и методы этого абстрактного класса наследуются дочерними наследниками) этого класса:
 
@@ -37,16 +37,18 @@ public abstract class AbstractArrayStorage implements Storage{//абстракт
 
         // проверка есть ли такое резюме в бд- чтобы оно было
         int index = getIndex(r.getUuid());//getIndex вернет индекс по значению
-        //если наш метод getIndex() вернет -1, или отрицат число(от сортированной реализации) то такого объекта в массиве нет:
-        if (index < 0) {
+        //если наш метод getIndex() вернет -1, или отрицат число(от сортированной реализации-предполагаемое положение
+        // элемента) то такого объекта в массиве нет:
+        if (index <= 0) {
             //тк мы создали свои эксэпшены, если такого объекта нет- бросим эксепшен:
             //System.out.println("Resume: " + r.getUuid() + " not exist");//вместо sout:
-            throw new NotExistStorageException(r.getUuid());
+            throw new NotExistStorageException(r.getUuid());//эксепшен унаследован от RuntimeException -> пробрасывать
+            //(throws) в сигнатуре- нельзя
 
 
 
         } else {
-            storage[index] = r;//новый объект r создаем в тестовом-майн классе перед вызовом этого метода
+            storage[index] = r;//новый объект r уже создан в тестовом-майн классе перед вызовом этого метода
         }
 
         //вариант моей реализации: //String newUuid - новое значение для Resume r в аргументы метода надо добавить

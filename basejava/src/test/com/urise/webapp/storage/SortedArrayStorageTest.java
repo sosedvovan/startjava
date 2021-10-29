@@ -1,10 +1,11 @@
-package test.com.urise.webapp.storage;
+package com.urise.webapp.storage;
 
+import com.urise.webapp.storage.AbstractArrayStorageTest;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class SortedArrayStorageTest extends AbstractArrayStorageTest{
+public class SortedArrayStorageTest extends AbstractArrayStorageTest {
 
     @Test
     public void getIndex() {

@@ -1,4 +1,4 @@
-package test.com.urise.webapp.storage;
+package com.urise.webapp.storage;
 
 import com.urise.webapp.exception.NotExistStorageException;
 import com.urise.webapp.model.Resume;
@@ -28,7 +28,7 @@ public abstract class AbstractArrayStorageTest {
 
     @Test
     public void clear() throws Exception{
-       // throw new IllegalAccessException();
+        // throw new IllegalAccessException();
     }
 
     @Test

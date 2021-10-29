@@ -130,4 +130,7 @@ public class StorageException extends RuntimeException{
  *
  * Руководство по конструкторам:
  * https://topjava.ru/blog/rukovodstvo-po-konstruktoram-v-java
+ *
+ *Ключевые слова: this, super:
+ * https://javarush.ru/groups/posts/1187-raznica-mezhdu-kljuchevihmi-slovami-this-i-super-v-java
  */
