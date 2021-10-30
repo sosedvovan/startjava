@@ -1,8 +1,8 @@
-package com.com.urise.webapp.storage;
+package com.urise.webapp.storage;
 
 
 
-import com.com.urise.webapp.model.Resume;
+import com.urise.webapp.model.Resume;
 
 import java.util.Arrays;
 
@@ -10,7 +10,7 @@ import java.util.Arrays;
 //а большое О стало от логарифма с основанием 2(бинарный поиск в массиве методом деления на 2)
 //этот класс implements Storage тк его родительский AbstractArrayStorage implements Storage
 
-public class SortedArrayStorage extends AbstractArrayStorage{
+public class SortedArrayStorage extends AbstractArrayStorage {
 
 
     //ЭТОТ МЕТОД- ЧАСТЬ ЛОГИКИ РЕАЛИЗУЕМОЙ В РОДИТЕЛЬСКОМ КЛАССЕ (ШАБЛОННЫЙ ПАТТЕРН)

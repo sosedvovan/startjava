@@ -1,4 +1,4 @@
-package com.com.urise.webapp.storage;
+package com.urise.webapp.storage;
 
 
 import org.junit.Test;

@@ -1,4 +1,4 @@
-package com.com.urise.webapp.exception;
+package com.urise.webapp.exception;
 
 /**
 * чтобы класс стал Exception ему надо унаследоваться от RuntimeException или от др Exception.
