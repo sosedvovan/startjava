@@ -7,21 +7,40 @@ import org.junit.Before;
 import org.junit.Test;
 
 public abstract class AbstractArrayStorageTest {
+    /**
+     * action в каждом тестовом методе создаем сценарий действия (можно в @Before)
+     * те создаем необходимые объекты, процесс создания которых надо проверить, или надо
+     * этити объекты использовать для вызова проверяемых методов. Так же здесь инициализируем
+     * эти объекты нужными нам значениями, инициализируем (заполняем) нужные нам массивы.
+     * Так же создаем подключения к БД и Серверу для проверки и др.
+     *
+     * assertion - сопоставление ожидания и полученного результата (с пом assertEquals() и др.)
+     */
 
     //для теста заполним storage тремя резюме:
-    private Storage storage;//чтобы класс заработал сампосебе работал допиши сюда new ArrayStorage
-    private static final String UUID_1 = "uuid1";       //и убери abstract
-    private static final String UUID_2 = "uuid2";
-    private static final String UUID_3 = "uuid3";
+    /**
+     * чтобы класс заработал сампосебе допиши сюда new ArrayStorage и убери abstract
+      */
 
-    @Before
+    private Storage storage;//указатель на какой-то Storage (SortedArrayStorage или dArrayStorage)
+    //здесь мы его не инициализируем тк этот абстракт класс исспользуем в дочках
+    private static final String UUID_1 = "uuid1"; //созд переменные String
+    private static final String UUID_2 = "uuid2"; //для @Before
+    private static final String UUID_3 = "uuid3"; //static- тк они одинак в каждом тест-методе
+
+    @Before//этот метод вызывается перед каждым тестовым методом
     public void detUp() throws Exception {
         storage.clear();
         storage.save(new Resume(UUID_1));
         storage.save(new Resume(UUID_2));
         storage.save(new Resume(UUID_3));
     }
-
+    //перед запуском каждого тестового метода будет запускаться метод @Before
+    //и очищаться и инициализироваться storage (в нашем случае)
+    //Вместо @Before можно @BeforeClass(тогда он и поля класса должны быть static)
+    //при запуске каждого тестового метода будет создаваться объект этого класса
+    //и на этом объекте будет запускаться тело тестового метода
+    //в названиях тестовых методов принято исп слово Should - (ожидается).
     @Test
     public void clear() throws Exception{
         // throw new IllegalAccessException();
