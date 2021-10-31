@@ -6,6 +6,7 @@ import com.urise.webapp.exception.StorageException;
 import com.urise.webapp.model.Resume;
 import org.junit.Assert;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;//статический импорт чтобы не писать имя класса
                                                 //перед его методом
 import org.junit.Before;
@@ -38,15 +39,30 @@ public abstract class AbstractArrayStorageTest {
     private static final String UUID_3 = "uuid3"; //static- тк они одинак в каждом тест-методе
     private static final Resume RESUME_3 = new Resume(UUID_3);
 
-    private static final String UUID_4 = "uuid3";
-    private static final Resume RESUME_4 = new Resume(UUID_3);
+    private static final String UUID_4 = "uuid4";
+    private static final Resume RESUME_4 = new Resume(UUID_4);
 
+    /**
+     * Инициализировать объекты, кот нам нужны для тестов,
+     * мы могли бы еще в статическом блоке:
+     *
+     * static {
+     *         RESUME_1 = new Resume(UUID_1);
+     *         RESUME_2 = new Resume(UUID_2);
+     *         RESUME_3 = new Resume(UUID_3);
+     *         RESUME_4 = new Resume(UUID_4);
+     *     }
+     */
+
+    //в этот конструктор(принимает интерфейс) из дочернего класса придет объект этого
+    //дочернего класса и проинициализирует поле private Storage storage; ->
+    //-> нижележащие тестовые методы будут срабатывать на объекте дочернего класса
     protected AbstractArrayStorageTest(Storage storage) {
         this.storage = storage;
     }
 
     @Before//этот метод вызывается перед каждым тестовым методом
-    public void detUp() throws Exception {
+    public void setUp() throws Exception {
         storage.clear();
         storage.save(RESUME_1);//ctrl + alt + C -> выделить в константы
         storage.save(RESUME_2);//shift + F6 -> рефактор ренейм
@@ -66,7 +82,13 @@ public abstract class AbstractArrayStorageTest {
     }
 
     @Test
-    public void update() throws Exception{
+    public void update() throws Exception{//тест метода update(
+        Resume newResume = new Resume(UUID_1);//создали объект Resume
+        storage.update(newResume);//записали этот объект в хранилище-наш массив storage
+        assertTrue(newResume == storage.get(UUID_1));//запросили из хранилища этот объект Resume по
+        // значению его поля и сравнили с ожидаемым-кот только что создали
+        //это будет работать пока хранилище в памяти а не в реальной ДБ. тк из ДБ мы будем
+        //доставать объект с теми же полями, но физически в куче это будет другой объект
     }
 
     @Test
@@ -74,8 +96,8 @@ public abstract class AbstractArrayStorageTest {
         Resume[] array = storage.getAll();//получим этот массив(он не отсортирован- в порядке занесения)
         Assert.assertEquals(3, array.length);//ожидаем что длина этого массива 3
         Assert.assertEquals(RESUME_1, array[0]);//ожидаем что RESUME_1 лежит в первой ячейке
-        Assert.assertEquals(RESUME_2, array[0]);//ожидаем что RESUME_1 лежит в первой ячейке
-        Assert.assertEquals(RESUME_3, array[0]);//ожидаем что RESUME_1 лежит в первой ячейке
+        Assert.assertEquals(RESUME_2, array[1]);//ожидаем что RESUME_2 лежит во второй ячейке
+        Assert.assertEquals(RESUME_3, array[2]);//ожидаем что RESUME_3 лежит в третьей ячейке
 
     }
 
@@ -92,11 +114,11 @@ public abstract class AbstractArrayStorageTest {
 
     @Test(expected = NotExistStorageException.class)
     public void delete() throws Exception{
-        storage.save(RESUME_1);//сначала удалим элемент
+        storage.delete(UUID_1);//сначала удалим элемент
         assertSize(2);//теперь можем проверить Size
-        storage.get(UUID_1);//теперь попробуем взять удаленный элемент- соотв должен
-                            //быть эксепшен- вынесем его в @Test
-
+        storage.get(UUID_1);//теперь попробуем взять удаленный
+        //(уже не существующий) элемент - соотв должен быть эксепшен-
+        // вынесем его в @Test
     }
 
     @Test
@@ -125,7 +147,7 @@ public abstract class AbstractArrayStorageTest {
 
     @Test(expected = NotExistStorageException.class)
     public void updateNotExist() throws Exception{ //проверка нашего собственого ексепшена
-       // storage.delete("dummu");//пробуем изменить объект которого нет
+       storage.delete("dummu");//пробуем удалить объект которого нет
     }
 
     @Test(expected = ExistStorageException.class)
@@ -162,6 +184,33 @@ public abstract class AbstractArrayStorageTest {
  * Тестирование с помощью JUnit (Test Case):
  * http://web.archive.org/web/20190829153452/http://www.javenue.info/post/19
  *
+ * Тестирование кода Java с помощью фреймворка JUnit от SpecialistTV:
+ * https://www.youtube.com/watch?v=z9jEVLCF5_w
  *
- *
+ * В каких случаях использовать fail():
+ * https://stackoverflow.com/questions/3869954/whats-the-actual-use-of-fail-in-junit-test-case
  **/
+
+/**
+ *
+ * Подсказки по HW4:
+ *
+ *     SortedArrayStorageTest должен запускаться с SortedArrayStorage
+ *     ArrayStorageTest c ArrayStorage
+ *     для этогодобавьте конструктор в AbstractArrayStorageTest, который инициализирует Storage storage,
+ *     а в наследниках добавьте конструкторы, которые будут вызывать super() с нужным хранилищем
+ *
+ *     тестировать правильность сортировки не надо
+ *
+ *     в тестах проверяйте Resume целиком, а не их uuid
+ *
+ *     иерархия наследования тестовых классов должна совпадать с иерархией тестируемых
+ *
+ *     логика реализации теста на переполнение массива (StorageException):
+ *     заполняем массив, но не вызываем у него переполнение
+ *     если при заполнении вылетит исключение, то тест должен провалиться (используйте Assert.fail())
+ *     в fail() выводите сообщение о том, что переполнение произошло раньше времени
+ *     тест считается успешно пройденным, когда переполнение происходит при попытке добавить
+ *     в полностью заполненный массив еще одно резюме
+ *
+ */

@@ -8,7 +8,9 @@ import java.util.UUID;
 public class Resume implements Comparable<Resume>{
 
     //Unique identifier
-    private final String uuid;//сделали поле final -> обязат. нужен конструктор, а сеттер надо удалить
+    private final String uuid;//сделали поле final -> обязат. нужено инициализировать
+                                // можно ициализировать с пом конструктора, а сеттер надо удалить?
+    //private  String fullName;
 
     public Resume(){//это конструктор без параметров с автогенерацией uuid
         this(UUID.randomUUID().toString());//с пом. this он подает автосгенерированную строку

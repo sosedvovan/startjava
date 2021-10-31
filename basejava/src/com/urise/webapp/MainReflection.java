@@ -35,7 +35,8 @@ public class MainReflection {
         //своего сеттера у класса Resume НЕТ
         field.set(r, "new_uuid");
 
-        //реализуем(@Overread) метод toString через рефлекшн:
+        //Задание: В MainReflection вызовите у Resume, через отражение, метод toString.
+        //Выведите результат на консоль
         Method method = resumeClass.getMethod("toString");
         Object result = method.invoke(r);//выполним этот метод с пом invoke()
         System.out.println(result);//выведем результат
