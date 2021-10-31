@@ -1,6 +1,8 @@
 package com.urise.webapp.storage;
 
+import com.urise.webapp.exception.ExistStorageException;
 import com.urise.webapp.exception.NotExistStorageException;
+import com.urise.webapp.exception.StorageException;
 import com.urise.webapp.model.Resume;
 import org.junit.Assert;
 
@@ -114,6 +116,35 @@ public abstract class AbstractArrayStorageTest {
     @Test(expected = NotExistStorageException.class)//тесту сказали что ожитаем этот эксепшен
     public void getNotExist() throws Exception{
         storage.get("dummi");//и попробуем найти несуществующее значение.
+    }
+
+    @Test(expected = NotExistStorageException.class)
+    public void deleteNotExist() throws Exception{ //проверка нашего собственого ексепшена
+        storage.delete("dummu");//пробуем удалить объект которого нет
+    }
+
+    @Test(expected = NotExistStorageException.class)
+    public void updateNotExist() throws Exception{ //проверка нашего собственого ексепшена
+       // storage.delete("dummu");//пробуем изменить объект которого нет
+    }
+
+    @Test(expected = ExistStorageException.class)
+    public void saveNotExist() throws Exception{ //проверка нашего собственого ексепшена
+        storage.save(RESUME_1);//пробуем сохранить объект который уже есть в массиве
+    }
+
+    @Test(expected = StorageException.class)//проверка переполнения нашего массива storage
+    public void saveOverflow() throws Exception{ //проверка нашего собственого ексепшена
+        try {
+            for (int i = 4; i <= AbstractArrayStorage.STORAGE_LIMIT; i++) {
+                storage.save(new Resume());//заполним весь массив
+            }
+        }catch (StorageException e){
+            Assert.fail();
+        }
+        storage.save(new Resume());//пробуем после заполнения массива записать туда еще один объект
+        //на этой крайней строчке должен выбросится StorageException -тогда тест пройден
+        //но если StorageException выбросится в цикле for, тогда тест завалится-> возьмем в try-catch
     }
 
     private void assertSize(int size){//приватный внутренний служебный метод
