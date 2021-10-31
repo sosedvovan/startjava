@@ -78,3 +78,12 @@ public abstract class AbstractArrayStorageTest {
         storage.get("dummi");//и попробуем найти несуществующее значение.
     }
 }
+
+
+/**
+ * Тестирование с помощью JUnit (Test Case):
+ * http://web.archive.org/web/20190829153452/http://www.javenue.info/post/19
+ *
+ *
+ *
+ **/

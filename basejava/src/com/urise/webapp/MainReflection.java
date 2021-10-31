@@ -5,17 +5,20 @@ package com.urise.webapp;
 import com.urise.webapp.model.Resume;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 //в классе Resume есть private поле, которое никто снаружи не видит, но мы с пом рефлексии увидим его и поменяем
 //иногда этим пользуются для сериализации и чтением из файла
 public class MainReflection {
 
     //запустим дебагер -> выделем объект r -> alt+f8(or Run -> Evaluate Excpression) -> getClass() ... or other
-    public static void main(String[] args) throws IllegalAccessException {
+    public static void main(String[] args) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Resume r = new Resume();//используем конструктор без параметров - там сгенерится  значение
 
         //достанем первый элемент[0] из массива полей класса Resume через его объект r:
-        Field field = r.getClass().getDeclaredFields()[0];//Field -класс библиотеки рефлекшн
+        Class<? extends Resume> resumeClass = r.getClass();//сделали экстракт вариэйбл r.getClass()
+        Field field = resumeClass.getDeclaredFields()[0];//Field -класс библиотеки рефлекшн
 
         field.setAccessible(true);//без этого будет ошибка:
         //java.lang.IllegalAccessException: class com.urise.webapp.MainReflection cannot access a member of class
@@ -32,9 +35,16 @@ public class MainReflection {
         //своего сеттера у класса Resume НЕТ
         field.set(r, "new_uuid");
 
-        System.out.println("заданное в рефлекшн сеттере значен поля:  " + r);//у r вызывается toString()
+        //реализуем(@Overread) метод toString через рефлекшн:
+        Method method = resumeClass.getMethod("toString");
+        Object result = method.invoke(r);//выполним этот метод с пом invoke()
+        System.out.println(result);//выведем результат
+        //System.out.println("заданное в рефлекшн сеттере значен поля:  " + r);//у r вызывается toString()
+        //можно поставить бреак поинт в Resume в методе toString и посмотреть что происходит
     }
 }
+
+
 //чекед эксепшены можно оборачивать в рантайм эксепшены или в другие
 
 //так же через рефлекшн можно брать анотоции у объекта, ту-стринг и др методы класса
