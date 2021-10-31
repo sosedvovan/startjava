@@ -4,20 +4,12 @@ package com.urise.webapp.storage;
 import com.urise.webapp.model.Resume;
 import org.junit.Test;
 
-public class ArrayStorageTest extends AbstractArrayStorage {
+public class ArrayStorageTest extends AbstractArrayStorageTest {
 
-    @Test
-    protected int getIndex(String uuid) {
-        return 0;
+    //мы наследуемся от класса в кот нет дефолтного конструктора, след надо сделать конструктор
+    public ArrayStorageTest() {
+        super(new ArrayStorage());
     }
 
-    @Test
-    protected void fillDeletedElement(int index) {
 
-    }
-
-    @Test
-    protected void insertElement(Resume r, int index) {
-
-    }
 }

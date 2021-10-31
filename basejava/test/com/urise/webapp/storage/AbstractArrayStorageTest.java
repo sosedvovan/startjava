@@ -3,6 +3,9 @@ package com.urise.webapp.storage;
 import com.urise.webapp.exception.NotExistStorageException;
 import com.urise.webapp.model.Resume;
 import org.junit.Assert;
+
+import static org.junit.Assert.assertEquals;//статический импорт чтобы не писать имя класса
+                                                //перед его методом
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,17 +26,29 @@ public abstract class AbstractArrayStorageTest {
       */
 
     private Storage storage;//указатель на какой-то Storage (SortedArrayStorage или dArrayStorage)
-    //здесь мы его не инициализируем тк этот абстракт класс исспользуем в дочках
+    //для его инициализации исп конструктор
     private static final String UUID_1 = "uuid1"; //созд переменные String
+    private static final Resume RESUME_1 = new Resume(UUID_1);//созд объекты для массива storage
+
     private static final String UUID_2 = "uuid2"; //для @Before
+    private static final Resume RESUME_2 = new Resume(UUID_2);
+
     private static final String UUID_3 = "uuid3"; //static- тк они одинак в каждом тест-методе
+    private static final Resume RESUME_3 = new Resume(UUID_3);
+
+    private static final String UUID_4 = "uuid3";
+    private static final Resume RESUME_4 = new Resume(UUID_3);
+
+    protected AbstractArrayStorageTest(Storage storage) {
+        this.storage = storage;
+    }
 
     @Before//этот метод вызывается перед каждым тестовым методом
     public void detUp() throws Exception {
         storage.clear();
-        storage.save(new Resume(UUID_1));
-        storage.save(new Resume(UUID_2));
-        storage.save(new Resume(UUID_3));
+        storage.save(RESUME_1);//ctrl + alt + C -> выделить в константы
+        storage.save(RESUME_2);//shift + F6 -> рефактор ренейм
+        storage.save(RESUME_3);
     }
     //перед запуском каждого тестового метода будет запускаться метод @Before
     //и очищаться и инициализироваться storage (в нашем случае)
@@ -44,6 +59,8 @@ public abstract class AbstractArrayStorageTest {
     @Test
     public void clear() throws Exception{
         // throw new IllegalAccessException();
+        storage.clear();//почистили
+        assertSize(0);//убедились, что size стал 0
     }
 
     @Test
@@ -51,31 +68,61 @@ public abstract class AbstractArrayStorageTest {
     }
 
     @Test
-    public void getAll() throws Exception{
+    public void getAll() throws Exception{//тк метод getAll() возвращает массив:
+        Resume[] array = storage.getAll();//получим этот массив(он не отсортирован- в порядке занесения)
+        Assert.assertEquals(3, array.length);//ожидаем что длина этого массива 3
+        Assert.assertEquals(RESUME_1, array[0]);//ожидаем что RESUME_1 лежит в первой ячейке
+        Assert.assertEquals(RESUME_2, array[0]);//ожидаем что RESUME_1 лежит в первой ячейке
+        Assert.assertEquals(RESUME_3, array[0]);//ожидаем что RESUME_1 лежит в первой ячейке
+
     }
 
     @Test
-    public void save() throws Exception{
+    public void save() throws Exception{//проверка метода save()
+        storage.save(RESUME_4);//сначала запишем в storage новый элемент
+        assertSize(4);//теперь можем проверить Size
+
+        //теперь найдем объект по значению его поля с пом get() и ожидаем RESUME_4 соответственно
+        assertGet(RESUME_4);//воссп своим служебным прайвет методом
+        //assertEquals(RESUME_4, storage.get(UUID_4));//иссп статический импорт при обращении к методу
+
     }
 
-    @Test
+    @Test(expected = NotExistStorageException.class)
     public void delete() throws Exception{
+        storage.save(RESUME_1);//сначала удалим элемент
+        assertSize(2);//теперь можем проверить Size
+        storage.get(UUID_1);//теперь попробуем взять удаленный элемент- соотв должен
+                            //быть эксепшен- вынесем его в @Test
+
     }
 
     @Test
     public void size() throws Exception{
         //проверим этот метод. 3- это сколько ожидается.
-        Assert.assertEquals(3, storage.size());
+        assertSize(3);
     }
 
     @Test
     public void get() throws Exception{
+        assertGet(RESUME_1);//воссп своим служебным прайвет методом
+        assertGet(RESUME_2);//там мы по uuid'у достаем RESUME_? из storage
+        assertGet(RESUME_3);//и сравниваем с правильным ответом
     }
 
     //дописали руками- тест на NotExist:
     @Test(expected = NotExistStorageException.class)//тесту сказали что ожитаем этот эксепшен
     public void getNotExist() throws Exception{
         storage.get("dummi");//и попробуем найти несуществующее значение.
+    }
+
+    private void assertSize(int size){//приватный внутренний служебный метод
+        assertEquals(size, storage.size());//подаем ожидаемый size и сравниваем с имеющимся
+    }
+
+    private void assertGet(Resume r){//приватный внутренний служебный метод
+        assertEquals(r, storage.get(r.getUuid()));//подаем ожидаемый Resume r и сравниваем
+                    // с полученным из нашего метода get()
     }
 }
 
