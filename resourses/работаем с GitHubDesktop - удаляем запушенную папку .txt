@@ -1,0 +1,3 @@
+как удалить папки из облака: https://pc103help.blogspot.com/2020/10/udalenie-papok-i-fajlov-v-git-repozitorii-cherez-github-deskt.html
+
+скачать: https://desktop.github.com/
