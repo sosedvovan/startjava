@@ -1,3 +1,7 @@
 как удалить папки из облака: https://pc103help.blogspot.com/2020/10/udalenie-papok-i-fajlov-v-git-repozitorii-cherez-github-deskt.html
 
 скачать: https://desktop.github.com/
+
+после манипуляций по удалению лишних папок из облака с помощью github-desktop
+не работал пушинг из командной строки
+из Идеа сработал и попросил мегре
