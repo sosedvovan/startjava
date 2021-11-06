@@ -23,7 +23,7 @@ public class SortedArrayStorage extends AbstractArrayStorage {
     //возвращает индекс элемента в массиве по значению этого элемента
     //если элемент не найден- возвращает любое отрицательное число
     @Override
-    protected int getIndex(String uuid) {//получаем значение поля
+    protected Integer getSearchKey(String uuid) {//получаем значение поля
         Resume searchKey = new Resume(uuid);//создаем новый объект
 
         //сеттер удалим тк стали использовать конструктор

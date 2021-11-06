@@ -17,11 +17,11 @@ public class Resume /*implements Comparable<Resume>*/{
     //Unique identifier
     private final String uuid;
     /** <p>
-     *сделали поле final -> обязат. нужено инициализировать
+     *сделали поле final -> обязат. нужно инициализировать
      * можно ициализировать с пом конструктора, а сеттер надо удалить тк final
      </p>*/
 
-    //private  String fullName;
+    private  String fullName;
 
 
     public Resume(){//

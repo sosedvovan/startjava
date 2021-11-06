@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;//статический импор�
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class AbstractArrayStorageTest {
+public abstract class AbstractStorageTest {
     /**
      * action в каждом тестовом методе создаем сценарий действия (можно в @Before)
      * те создаем необходимые объекты, процесс создания которых надо проверить, или надо
@@ -76,7 +76,7 @@ public abstract class AbstractArrayStorageTest {
     //в этот конструктор(принимает интерфейс) из дочернего класса придет объект этого
     //дочернего класса и проинициализирует поле private Storage storage; ->
     //-> нижележащие тестовые методы будут срабатывать на объекте дочернего класса
-    protected AbstractArrayStorageTest(Storage storage) {
+    protected AbstractStorageTest(Storage storage) {
         this.storage = storage;
     }
 

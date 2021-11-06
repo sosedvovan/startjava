@@ -1,10 +1,7 @@
 package com.urise.webapp.storage;
 
 
-import com.urise.webapp.model.Resume;
-import org.junit.Test;
-
-public class ArrayStorageTest extends AbstractArrayStorageTest {
+public class ArrayStorageTest extends AbstractStorageTest {
 
     //мы наследуемся от класса в кот нет дефолтного конструктора, след надо сделать конструктор
     public ArrayStorageTest() {
