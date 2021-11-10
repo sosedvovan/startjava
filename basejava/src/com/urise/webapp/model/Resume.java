@@ -6,10 +6,10 @@ import java.util.UUID;
 /** <p> implements Comparable<Resume> говорит о том что объекты этого класса можно сравнивать-
 * чтобы работал метод Arrays.binarySearch()-поиск индекса по значению методом бинарного деления на 2
 * в классе SortedArrayStorage.
-* реализуем - (@Override) метод compareTo() этого интерфейса(Comparable) и подправим его вручную. см ниже.
 
-* убрали implements Comparable<Resume> кот нужен был для метода getIndex()с бинарным поиском в классе SortedArrayStorage
-* в классе SortedArrayStorage вместо Comparable  реализуем Comparator с пом лямбды.</p>
+* но мы убрали implements Comparable<Resume> кот нужен был для метода getIndex()с бинарным поиском
+ * в классе SortedArrayStorage
+* и классе SortedArrayStorage вместо Comparable  реализуем Comparator с пом внутр. класса -> лямбды.</p>
  */
 
 public class Resume /*implements Comparable<Resume>*/{
@@ -31,6 +31,7 @@ public class Resume /*implements Comparable<Resume>*/{
      * выше конструктор без параметров с автогенерацией uuid
      * с пом. this он подает автосгенерированную строку
      * в конструктор с параметрами(который ниже)
+     * следовательно он не может существовать без конструктора с параметрами
      * </p>*/
     public Resume(String uuid) {
         this.uuid = uuid;
@@ -60,8 +61,8 @@ public class Resume /*implements Comparable<Resume>*/{
 
         Resume resume = (Resume) o;//приводим Object o к нашему классу
 
-        return Objects.equals(uuid, resume.uuid);//проверка поля объекта на null
-        //проверка поля объекта на null  и сравнение поля обекта
+        return Objects.equals(uuid, resume.uuid);//проверка равенства объектов по полю uuid будет
+        //перегруженный equals- возвращает true если первый не null и если равны ссылки и значения полей
     }
 
     //переопределили hashCode()
@@ -77,13 +78,13 @@ public class Resume /*implements Comparable<Resume>*/{
     }
 
     /** <p>
-     * реализовали этот метод когда этот класс implements Comparable<>
+     * реализовали нижележащий закоментированный метод когда этот класс implements Comparable<>
      * но потом Comparable заменили на Comparator с лямбдой в классе SortedArrayStorage
      *
      * @Override
      * public int compareTo(Resume o) {
      *  return uuid.compareTo(o.uuid);//это дописали руками наподобии equals
      * }
-     *
+     * compareTo() сравнивает в лексикографическом порядке
     </p>*/
 }

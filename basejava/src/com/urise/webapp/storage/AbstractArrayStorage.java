@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 /** <p>
  * абстрактные классы могут не имплементировать абстрактные методы интерфейсов которые они реализуют,
- * тк их тогда обязанны будут реализовать наследники.
+ * и их тогда обязанны будут реализовать наследники.
  * но сечас мы будем их реализовывать.
  *
  * все поля и методы этого абстрактного класса наследуются наследниками (extends AbstractArrayStorage) этого класса.
@@ -24,23 +24,32 @@ import java.util.Arrays;
  *
  </p>*/
 
+//дореализовываем в этом классе методы интерфейса Storage clear(), size() и getAll(), который не реализовали в
+//абстрактном классе - родителе этого класса (этот метод получается-пробросился сюда)
+//так же реализуем(@Override) абстрактные методы родителя этого класса. Реализуем способом,
+// присущим Array'ю (пробрасывать дальше их не будем).
 
 public abstract class AbstractArrayStorage /*implements Storage*/extends AbstractStorage {
 
-    //ПОЛЯ КЛАССА:
+    //ПОЛЯ КЛАССА присущие Array'ю:
 
+    //ограничение обычного массива-хранилища
     protected static final int STORAGE_LIMIT = 100000;
     //protected = public + видны в наследниках
 
+
     protected Resume[] storage = new Resume[STORAGE_LIMIT];
-    //это массив- хранилище Резюме
+    //это обычный массив- хранилище Резюме
 
     protected int size = 0;
     //инкрементим при добавлении элемента в массив storage и декрементим при удалении элемента
     //будем пользоваться size, тк метод storage.lengths() будет возвращать STORAGE_LIMIT = 100000
+    //тк пока у нас обычный массив
 
     //------------------------------------------------------------------------------------------------------------------
 
+    //реализуем здесь абстрактный метод из interface Storage (но и пробросить его можно тк этот класс абстакт)
+    @Override
     public void clear() {
         //метод служебного класса Arrays- fill() заполнит значениями часть массива (от 0 до size)
         //где size - инклюдев = включается(это можно уточнить в реализации метода)
@@ -55,11 +64,12 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    // Метод update() ушел к родителю реализовываться а вместо doUpdate() его дошаблонит:
+    // Метод update() ушел отсюда  к родителю реализовываться а  doUpdate() его дошаблонит:
 
     @Override
     protected void doUpdate(Resume r, Object index) {
         storage[(Integer) index] = r;
+        //положили наш апдатный объект Резюме в обычный массив
     }
 
      /*  //метод принимае объект (Resume r), ищет его индекс по значению поля, если находит - перезаписывает им же)
@@ -98,9 +108,10 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
     */
 
   //----------------------------------------------------------------------------------------
+  //реализуем здесь абстрактный метод из interface Storage (но и пробросить его можно тк этот класс абстакт)
     public Resume[] getAll() {
 
-        //метод Arrays.copyOfRange() копирует интервал от 0 индекса до size
+        //метод Arrays.copyOfRange() вернет новый скопируемый обычный массив (интервал копирования от 0 индекса до size)
         return Arrays.copyOfRange(storage, 0, size);
     }
         /*
@@ -114,7 +125,7 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
         */
 
     //------------------------------------------------------------------------------------------------------------------
-    // Метод save() ушел к родителю реализовываться а вместо dosave() его дошаблонит:
+    // Метод save() ушел к родителю реализовываться а вместо doSave() его дошаблонит:
 
     @Override
     //здесь дореализуем проверки
@@ -126,6 +137,7 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
         } else {// если элемента с таким значением в массиве нет и в массиве есть свободные ячейки:
             insertElement(r, (Integer) index);//ссузили тип индекса-но если в аргументах
             //придет не Integer а String, например то будет ClassCastException- далее поправим это
+            //insertElement() здесь абстрактный тк для обычного Array и SortedArray будут разные реализации
             size++;
         }
     }
@@ -166,7 +178,8 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
     @Override
     protected void doDelete(Object index) {
         fillDeletedElement((Integer) index);//этот абстрактный метод реализуем в дочках(по разному)
-        storage[size - 1] = null;//а на место последнего элемента запишем null
+        //в fillDeletedElement() удаляемому элементу присвоим крайний элемент
+        storage[size - 1] = null;//а на место крайнего элемента запишем null
         size--;                 //можно было еще сдвигать влево все элементы находящиеся справа от удаляемого элемента
     }
 
@@ -209,7 +222,7 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
     // Метод get() ушел к родителю реализовываться а вместо doget() его дошаблонит:
 
     @Override
-    protected Resume doGet(Object index) {
+    protected Resume doGet(Object index) {//в аргумент придет индекс искомого элемента (в обертке (Integer))
         return storage[(Integer) index];
     }
 
@@ -246,13 +259,16 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
     //------------------------------------------------------------------------------------------------------------------
 
 
+    //в этом классе обычного Array имплементим этот метод как для обычного Array)
     @Override//проверка- существует ли индекс в хранилище
     protected boolean isExist(Object index) {
         return (Integer) index >= 0; //если >= 0 то вернет true -> индекс существует
     }
 
-    //protected abstract int getIndex(String uuid);//подправили его ниже
+    //protected abstract int getIndex(String uuid);//изменили название и будем его реализовывать в наследниках
     protected abstract Integer getSearchKey(String uuid);
+    //Из дочки-обычного Array возвращает индекс искомого объекта, а если такого объекта нет, возвращает -1
+    //Из дочки-обычного SortedArray возвращает индекс искомого объекта а если такого объекта нет, возвращает null?
     //имплементим от родителя и пробрасываем наследникам
     //в наследниках надо его реализовать как часть шаблонного паттерна
     //здесь кавариация- мы ссузили возвращаемый тип(в классе от кот имплементимся-

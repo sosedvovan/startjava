@@ -41,7 +41,7 @@ public class ListStorage extends AbstractStorage {
 
     @Override
     protected boolean isExist(Object searchKey) {
-        return searchKey != null;//если != null, значит возвратили какое-то число
+        return searchKey != null;//если != null, значит возвратили true если такой объект существует
         //для массива не можем использовать а здесь можем
     }
 
