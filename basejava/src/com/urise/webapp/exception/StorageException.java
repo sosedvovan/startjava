@@ -2,8 +2,8 @@ package com.urise.webapp.exception;
 
 /**
 * чтобы класс стал Exception ему надо унаследоваться от RuntimeException или от др Exception.
- * плюс- эксепшен этого класса будем выбрасывать если массив переполнен (Storage overflow),
- * чтобы не создавать еще один спец. для этого.
+ * [эксепшен этого класса будем выбрасывать если массив переполнен (Storage overflow),
+ * чтобы не создавать еще один спец. для этого].
  */
 public class StorageException extends RuntimeException{
     /**
@@ -12,7 +12,7 @@ public class StorageException extends RuntimeException{
      а эксепшен этого класса будем выбрасывать если массив переполнен.
 
      Ексепшены это как бы обычные классы и мы в них хранить можем переменные
-     которые покажут - что же случилось, те private final String uuid будет указывать на проблемный uuid
+     которые покажут - что же случилось, т.е. private final String uuid будет указывать на проблемный uuid
     */
 
     /**
@@ -22,7 +22,7 @@ public class StorageException extends RuntimeException{
     private final String uuid;
 
     /**
-     * так выглядит конструктор (без сообщения):
+     * так выглядет конструктор (без сообщения):
      * public StorageException(String uuid) {
      * this.uuid = uuid;
      * }

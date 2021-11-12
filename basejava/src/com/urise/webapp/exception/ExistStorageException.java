@@ -5,6 +5,7 @@ package com.urise.webapp.exception;
  */
 public class ExistStorageException extends StorageException {
 
+    //конструктор:
     public ExistStorageException(String uuid) {
 
         /**

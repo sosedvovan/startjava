@@ -10,6 +10,7 @@ public class NotExistStorageException extends StorageException {
      * посылаем сообщение и проблемный uuid.
      */
 
+    //Конструктор:
     public NotExistStorageException(String uuid) {
         super("Resume " + uuid + " not exist", uuid);
 
