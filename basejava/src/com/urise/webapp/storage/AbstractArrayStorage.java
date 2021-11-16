@@ -2,12 +2,11 @@ package com.urise.webapp.storage;
 
 
 
-import com.urise.webapp.exception.ExistStorageException;
-import com.urise.webapp.exception.NotExistStorageException;
 import com.urise.webapp.exception.StorageException;
 import com.urise.webapp.model.Resume;
 
 import java.util.Arrays;
+import java.util.List;
 
 /** <p>
  * абстрактные классы могут не имплементировать абстрактные методы интерфейсов которые они реализуют,
@@ -109,10 +108,13 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
 
   //----------------------------------------------------------------------------------------
   //реализуем здесь абстрактный метод из interface Storage (но и пробросить его можно тк этот класс абстакт)
-    public Resume[] getAll() {
+    @Override
+    public List<Resume> doCopyAll() {
 
         //метод Arrays.copyOfRange() вернет новый скопируемый обычный массив (интервал копирования от 0 индекса до size)
-        return Arrays.copyOfRange(storage, 0, size);
+        //Arrays.asList() преобразует обычный массив в лист,
+        //и вернет не расширяемый, не ссужаемый список, но кот можно модифицировать -сортировать
+        return Arrays.asList(Arrays.copyOfRange(storage, 0, size));
     }
         /*
         // Resume[] result = new Resume[size]; //один из вариантов клонирования массива

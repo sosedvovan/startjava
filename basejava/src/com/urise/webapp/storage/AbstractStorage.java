@@ -12,6 +12,9 @@ import com.urise.webapp.exception.ExistStorageException;
 import com.urise.webapp.exception.NotExistStorageException;
 import com.urise.webapp.model.Resume;
 
+import java.util.Collections;
+import java.util.List;
+
 public abstract class AbstractStorage implements Storage {
     //методы size() и clear() getAll() мы сюда не можем скопировать из
     //AbstractArrayStorage тк для Мапа они будут другие
@@ -40,6 +43,9 @@ public abstract class AbstractStorage implements Storage {
     //метод getSearchKey() абстрактный вернет объект по значению его поля
     protected abstract Object getSearchKey(String uuid);
     //в наследниках надо его реализовать как часть шаблонного паттерна
+
+    //поставляет коллекцию, кот надо отсортировать
+    protected abstract List<Resume> doCopyAll();
 
     //-----------------------------------------------------------------------------------
     //БЛОК СЛУЖЕБНЫХ(для убирания дублирования) МЕТОДОВ:
@@ -129,6 +135,21 @@ public abstract class AbstractStorage implements Storage {
 
        
     }
+
+    //Todo: во всех реализациях Storage замените метод Resume[] getAll() на List<Resume> getAllSorted()
+    //заимплементировали здесь этот метод Ctrl+I
+    //далее тоже шаблонным методом будет передаваться логика
+    //то сортировку будем делать только здесь
+    @Override
+    public List<Resume> getAllSorted() {
+        //doCopyAll() наш абстрактный метод- будет поствалять сюда копию
+        //коллекции, которую надо отсортировать
+        List<Resume> list = doCopyAll();
+        Collections.sort(list);
+        return list;
+    }
+
+
 
     //------------------------------------------------------------------------------------------------------------------
 

@@ -2,49 +2,60 @@ package com.urise.webapp.storage;
 
 import com.urise.webapp.model.Resume;
 
+import java.util.*;
+
+//ТЕПЕРЬ РЕАЛИЗУЕМ СВОЕ ХРАНИЛИЩЕ НА ОСНОВЕ МАПЫ:
 public class MapUuidStorage extends AbstractStorage {
-    @Override
-    protected void doUpdate(Resume r, Object searchKey) {
 
+    private Map<String, Resume> map = new HashMap<>();
+
+    @Override
+    protected void doUpdate(Resume r, Object uuid) {
+        map.put((String) uuid, r);
     }
 
     @Override
-    protected void doSave(Resume r, Object searchKey) {
-
+    protected void doSave(Resume r, Object uuid) {
+        map.put((String) uuid, r);
     }
 
     @Override
-    protected void doDelete(Object searchKey) {
-
+    protected void doDelete(Object uuid) {
+        map.remove((String) uuid);
     }
 
     @Override
-    protected Resume doGet(Object searchKey) {
-        return null;
+    protected Resume doGet(Object uuid) {
+        return map.get((String) uuid);
     }
 
     @Override
-    protected boolean isExist(Object searchKey) {
-        return false;
+    protected boolean isExist(Object uuid) {
+        return map.containsKey((String) uuid);
     }
 
     @Override
-    protected Object getSearchKey(String uuid) {
-        return null;
+    protected String getSearchKey(String uuid) {
+        return uuid;
     }
 
     @Override
     public void clear() {
-
+        map.clear();
     }
 
     @Override
-    public Resume[] getAll() {
-        return new Resume[0];
+    public List<Resume> doCopyAll() {
+        //values()возвр колллекцию и мы делаем ее копию
+        return new ArrayList<>(map.values());
+
+
+        //вернем пока пустой готовый лист из Collections:
+        //return Collections.emptyList();
     }
 
     @Override
     public int size() {
-        return 0;
+        return map.size();
     }
 }

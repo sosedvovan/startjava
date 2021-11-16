@@ -10,7 +10,7 @@ import java.util.Comparator;
 //на основе сортированного массива, чтобы большое О стало не линейным(перебор всего массива)
 //а большое О стало от логарифма с основанием 2(бинарный поиск в массиве методом деления на 2)
 //этот класс implements Storage тк его родительский AbstractArrayStorage implements Storage
-
+//РЕАЛИЗУЕМ СВОЕ ХРАНИЛИЩЕ НА ОСНОВЕ ОБЫЧНОГО МАССИВА С ИСПОЛЬЗОВАНИЕМ МЕТОДА ДВОИЧНОГО ПОИСКА:
 public class SortedArrayStorage extends AbstractArrayStorage {
 
     //Внедрим это поле чтобы обращаться к нему из метода.
@@ -28,7 +28,8 @@ public class SortedArrayStorage extends AbstractArrayStorage {
     //если элемент не найден- возвращает любое отрицательное число
     @Override
     protected Integer getSearchKey(String uuid) {//принимает значение поля, возвращает индекс или null если не найденно
-        Resume searchKey = new Resume(uuid);//создаем новый объект-клон(пока в Resume 1-о поле)
+        Resume searchKey = new Resume(uuid, "dummy" );//создаем новый объект-клон(пока в Resume 1-о поле)
+        //"dummy" -фиктивное, тк binarySearch() сравнивает только по uuid
 
         //сеттер удалим тк стали использовать конструктор
         //searchKey.setUuid(uuid);//новому объекту присваеваем искомое значение поля из аргументов метода

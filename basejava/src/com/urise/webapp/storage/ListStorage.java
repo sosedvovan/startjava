@@ -4,7 +4,7 @@ import com.urise.webapp.model.Resume;
 
 import java.util.ArrayList;
 import java.util.List;
-
+//ТЕПЕРЬ РЕАЛИЗУЕМ СВОЕ ХРАНИЛИЩЕ НА ОСНОВЕ АРРАЙЛИСТА:
 public class ListStorage extends AbstractStorage {
     //выберем реализацию хранилища Резюме(аррей или линкед):
     //обычно самая частая операция для Резюме- это get
@@ -65,8 +65,12 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    public Resume[] getAll() {
-        return list.toArray(new Resume[list.size()]);
+    public List<Resume> doCopyAll() {
+        //вернем просто копию листа
+        return new ArrayList<>(list);
+
+
+       // return list.toArray(new Resume[list.size()]);
         //конвертируем лист в массив- есть много способов
         //в этом способе метод toArray() принимает дженерик -new Resume[]
     }

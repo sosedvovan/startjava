@@ -5,7 +5,7 @@ package com.urise.webapp.storage;
 //Это вариант массива- хранилища без сортировки внутри.
 
 import com.urise.webapp.model.Resume;
-
+//РЕАЛИЗУЕМ СВОЕ ХРАНИЛИЩЕ НА ОСНОВЕ ОБЫЧНОГО МАССИВА:
 //этот класс - дочка доделывает недоделанные в родителе) методы обычного Array присущим обычному Array способом)
 //ЦЕПОЧКА НАСЛЕДОВАНИЯ:ЭТОТ КЛАСС extends AbstractArrayStorage КОТОРЫЙ extends AbstractStorage КОТОРЫЙ implements Storage
 public class ArrayStorage extends AbstractArrayStorage {//так же implements Storage тк AbstractArrayStorage implements Storage
