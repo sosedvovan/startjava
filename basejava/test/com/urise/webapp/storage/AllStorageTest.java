@@ -3,6 +3,9 @@ package com.urise.webapp.storage;
 //в этом классе сгруперруем все тесты для их удобного запуска
 //с пом средств JUnit(анотаций)
 
+//Todo: Из-за того, что количество тестовых классов растет, воспользуйтесь аннотациями JUnit,
+// которые помогут упростить их запуск (только для JUnit4):
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -12,7 +15,8 @@ import org.junit.runners.Suite;
                 ArrayStorageTest.class,
                 SortedArrayStorageTest.class,
                 ListStorageTest.class,
-                MapUuidStorageTest.class
+                MapUuidStorageTest.class,
+                MapResumeStorageTest.class
         }
 )
 public class AllStorageTest {

@@ -28,7 +28,9 @@ import java.util.List;
 //так же реализуем(@Override) абстрактные методы родителя этого класса. Реализуем способом,
 // присущим Array'ю (пробрасывать дальше их не будем).
 
-public abstract class AbstractArrayStorage /*implements Storage*/extends AbstractStorage {
+
+//здесь родитель параметризуется <Integer>-ом, тк SearchKey здесь это Integer index
+public abstract class AbstractArrayStorage /*implements Storage*/extends AbstractStorage<Integer> {
 
     //ПОЛЯ КЛАССА присущие Array'ю:
 
@@ -66,7 +68,7 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
     // Метод update() ушел отсюда  к родителю реализовываться а  doUpdate() его дошаблонит:
 
     @Override
-    protected void doUpdate(Resume r, Object index) {
+    protected void doUpdate(Resume r, Integer index) {
         storage[(Integer) index] = r;
         //положили наш апдатный объект Резюме в обычный массив
     }
@@ -131,7 +133,7 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
 
     @Override
     //здесь дореализуем проверки
-    protected void doSave(Resume r, Object index) {//Ctrl+I -имплементить от родителя
+    protected void doSave(Resume r, Integer index) {//Ctrl+I -имплементить от родителя
         if (size == STORAGE_LIMIT) {//проверка-что в массиве еще есть свободные ячейки
             //System.out.println("Storage overflow");
             //для этой ситуации не будем создавать специальное исключение, а бросим родительское:
@@ -178,7 +180,7 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
     // Метод delete() ушел к родителю реализовываться а вместо dodelete() его дошаблонит:
 
     @Override
-    protected void doDelete(Object index) {
+    protected void doDelete(Integer index) {
         fillDeletedElement((Integer) index);//этот абстрактный метод реализуем в дочках(по разному)
         //в fillDeletedElement() удаляемому элементу присвоим крайний элемент
         storage[size - 1] = null;//а на место крайнего элемента запишем null
@@ -224,7 +226,7 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
     // Метод get() ушел к родителю реализовываться а вместо doget() его дошаблонит:
 
     @Override
-    protected Resume doGet(Object index) {//в аргумент придет индекс искомого элемента (в обертке (Integer))
+    protected Resume doGet(Integer index) {//в аргумент придет индекс искомого элемента (в обертке (Integer))
         return storage[(Integer) index];
     }
 
@@ -263,7 +265,7 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
 
     //в этом классе обычного Array имплементим этот метод как для обычного Array)
     @Override//проверка- существует ли индекс в хранилище
-    protected boolean isExist(Object index) {
+    protected boolean isExist(Integer index) {
         return (Integer) index >= 0; //если >= 0 то вернет true -> индекс существует
     }
 
@@ -274,7 +276,7 @@ public abstract class AbstractArrayStorage /*implements Storage*/extends Abstrac
     //имплементим от родителя и пробрасываем наследникам
     //в наследниках надо его реализовать как часть шаблонного паттерна
     //здесь кавариация- мы ссузили возвращаемый тип(в классе от кот имплементимся-
-    //возвращаемый тип- Object)(в детях ссузили)
+    //возвращаемый тип- Integer)(в детях ссузили)
     //ковариацию в аргументах метода нельзя делать-ошибка компилятора будет
 
 

@@ -5,20 +5,21 @@ import com.urise.webapp.model.Resume;
 import java.util.ArrayList;
 import java.util.List;
 //ТЕПЕРЬ РЕАЛИЗУЕМ СВОЕ ХРАНИЛИЩЕ НА ОСНОВЕ АРРАЙЛИСТА:
-public class ListStorage extends AbstractStorage {
+//здесь родитель параметризуется <Integer>-ом, тк SearchKey здесь это Integer searchKey(вместо Object searchKey-раньше)
+public class ListStorage extends AbstractStorage<Integer> {
     //выберем реализацию хранилища Резюме(аррей или линкед):
     //обычно самая частая операция для Резюме- это get
     //а операция  get самая дешевая в ArrayList:
     private List<Resume> list = new ArrayList<>();
 
     @Override
-    protected void doUpdate(Resume r, Object searchKey) {
-        list.set((Integer) searchKey, r);//сетим по индексу обновленное резюме
+    protected void doUpdate(Resume r, Integer searchKey) {
+        list.set(searchKey, r);//сетим по индексу обновленное резюме
         //то же что и в dosave(), только разница в проверке-сущ или несущ.
     }
 
     @Override
-    protected void doSave(Resume r, Object searchKey) {
+    protected void doSave(Resume r, Integer searchKey) {
         // сетим по индексу новое резюме:
         //  list.set((Integer) searchKey, r);
         //searchKey приходит = null ->
@@ -28,19 +29,19 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    protected void doDelete(Object searchKey) {
-        list.remove(((Integer) searchKey).intValue());
+    protected void doDelete(Integer searchKey) {
+        list.remove((searchKey).intValue());
         //без intValue() remove не сработает. тк в remove надо отправить индекс-число
         //а searchKey это? не число?
     }
 
     @Override
-    protected Resume doGet(Object searchKey) {
-        return list.get((Integer) searchKey);//берем по индексу обновленное резюме
+    protected Resume doGet(Integer searchKey) {
+        return list.get(searchKey);//берем по индексу обновленное резюме
     }
 
     @Override
-    protected boolean isExist(Object searchKey) {
+    protected boolean isExist(Integer searchKey) {
         return searchKey != null;//если != null, значит возвратили true если такой объект существует
         //для массива не можем использовать а здесь можем
     }

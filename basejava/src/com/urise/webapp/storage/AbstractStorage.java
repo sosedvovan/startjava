@@ -14,34 +14,55 @@ import com.urise.webapp.model.Resume;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
-public abstract class AbstractStorage implements Storage {
+
+//Object заменили на <SK>-дженерик- след в наследниках этого класса надо добавить:
+//------   public class ListStorage extends AbstractStorage<Integer> ------
+
+//и далее во всех классах-наследниках Object заменяем на <Integer> или <String> или <Resume>
+// тк в (важном)методе поиска ключа: ---   protected abstract SK getSearchKey(String uuid);   ---
+//возвращаемое значение теперь это <...>- ожидаемый тип при декларации дочернего класса
+//то мы параметризовали тип ключа-поиска(SearchKey) для разных реализаций хранилищ
+
+// когда реализуем абстрактные методы родительского класса(и далеее можно убрать кастование)
+public abstract class AbstractStorage<SK> implements Storage {
     //методы size() и clear() getAll() мы сюда не можем скопировать из
     //AbstractArrayStorage тк для Мапа они будут другие
+
+    //-------------------------------------------------------------------------
+    //ЛОГИРОВАНИЕ:
+    //чтобы Logger стал единственным для всех экземпляров класса сделаем его
+    //не protected, а private static.(те объект Logger создается 1 раз для всех инстансов класса
+    // -мы логирование будем делать только в этом классе, в наследниках не будем- поэтому static )
+    // след ---- Logger.getLogger(getClass().getName()--- getClass() уже не можем сказать:
+    //(если поле принадлежит классу-оно static, то getClass() не можем использовать
+    // тк этот метод на объекте вызывается?)
+    private static final Logger LOG = Logger.getLogger(AbstractStorage.class.getName());
 
     //-------------------------------------------------------------------------
     //БЛОК АБСТРАКТНЫХ МЕТОДОВ (перенесли вверх):
 
     //метод для доапдейта в разных реализациях дочек:
-    protected abstract void doUpdate(Resume r, Object searchKey);
+    protected abstract void doUpdate(Resume r, SK searchKey);
 
     //метод для досохранения в разных реализациях дочек:
-    protected abstract void doSave(Resume r, Object searchKey);
+    protected abstract void doSave(Resume r, SK searchKey);
 
     //метод для доудаления в разных реализациях дочек:
-    protected abstract void doDelete(Object searchKey);
+    protected abstract void doDelete(SK searchKey);
 
     //метод для допоказывания Резюме по его значению полей в разных реализациях дочек:
-    protected abstract Resume doGet(Object searchKey);
+    protected abstract Resume doGet(SK searchKey);
 
     //метод для проверки- есть ли такой элемент- в разных реализациях дочек:
-    //делаем в зависимости от того- какой searchKey (поэтому он типа Object,
+    //делаем в зависимости от того- какой searchKey (поэтому он типа SK,
     //те  он может быть и int и String)
     //те для обычного Array одна реализация, а для List и Map - другие реализации
-    protected abstract boolean isExist(Object searchKey);
+    protected abstract boolean isExist(SK searchKey);
 
     //метод getSearchKey() абстрактный вернет объект по значению его поля
-    protected abstract Object getSearchKey(String uuid);
+    protected abstract SK getSearchKey(String uuid);
     //в наследниках надо его реализовать как часть шаблонного паттерна
 
     //поставляет коллекцию, кот надо отсортировать
@@ -55,8 +76,9 @@ public abstract class AbstractStorage implements Storage {
     //или если такой обект существует- возвращаем его в update()->он пойдет в doUpdate()
     // ЭТОТ МЕТОД ИСПОЛЬЗУЕМ В update()
     //также далее сделаем симметричный метод getNotExistedKey
-    private Object getExistedSearchKey(String uuid) {
-        Object searchKey = getSearchKey(uuid);
+    private SK getExistedSearchKey(String uuid) {
+
+        SK searchKey = getSearchKey(uuid);
         //метод getSearchKey() абстрактный вернет индекс по значению
         //ему разные реализации будем писать в наследниках: Array, List, Map
         //помним: что в мапе нет индексов(там беспорядочное распределение пар)
@@ -64,6 +86,8 @@ public abstract class AbstractStorage implements Storage {
         //создадим здесь выше абстрактный метод isExist() для распараллеривания проверки в разных реализациях хранилищ:
         if (!isExist(searchKey)) {
             //если объект найден(-приходит true - !переворачиваем на false-  не выбрасываем ексепшен-блок пропускается)
+            //и сделаем еще вывод в лог для удобства отслеживания этого эксепшена:
+            LOG.warning("Resume " + uuid + " already exist" + uuid);
             throw new NotExistStorageException(uuid);
             //эксепшен унаследован от RuntimeException -> пробрасывать (throws) в сигнатуре- нельзя
         }
@@ -73,8 +97,8 @@ public abstract class AbstractStorage implements Storage {
     //если ключик существует- бросаем эксепшн.
     //или возвратится searchKey или бросится ексепшн
     //ЭТОТ МЕТОД ИСПОЛЬЗУЕМ В save()
-    private Object getNotExistedSearchKey(String uuid) {
-        Object searchKey = getSearchKey(uuid);
+    private SK getNotExistedSearchKey(String uuid) {
+        SK searchKey = getSearchKey(uuid);
         //метод getSearchKey() абстрактный вернет объект по значению поля uuid
         //ему тела будем писать в наследниках- мапе и др
 
@@ -90,8 +114,10 @@ public abstract class AbstractStorage implements Storage {
     //----------------------------------------------------------------------------
     //метод принимае объект (Resume r), ищет его индекс по значению поля, если находит - перезаписывает им же)
     public void update(Resume r) {
+        //в каждом методе добавим логирование:
+        LOG.info("update" + r);
         // сначала проверка: есть ли такое резюме в бд- надо чтобы оно было.
-        Object searchKey = getExistedSearchKey(r.getUuid());
+        SK searchKey = getExistedSearchKey(r.getUuid());
         //getExistedSearchKey() или возвратится существующий ключ поиска searchKey
         // и он отправится на обновление
         // или бросится ексепшн что такого резюме нет в ДБ
@@ -106,8 +132,10 @@ public abstract class AbstractStorage implements Storage {
     //а добавление нового элемента будет в первой дочке ... методом ...,
     //а добавление нового элемента во второй дочке ... будет ...
     public void save(Resume r) {
+        //в каждом методе добавим логирование:
+        LOG.info("save" + r);
         //проверка есть ли такое резюме в бд- надо чтобы его небыло:
-        Object searchKey = getNotExistedSearchKey(r.getUuid());
+        SK searchKey = getNotExistedSearchKey(r.getUuid());
         //getNotExistedSearchKey() или возвратится не существующий ключ поиска searchKey == null?
         // и он отправится на сохранение
         // или бросится ексепшн что такое резюме уже есть в ДБ
@@ -124,8 +152,9 @@ public abstract class AbstractStorage implements Storage {
     //в этом методе применим шаблонный метод. те часть с проверками будет здесь(в родительском классе)
 
     public void delete(String uuid) {//далее дублирование кода- избавимся в методе getExistedKey()
+        LOG.info("delete" + uuid);
         // сначала проверка: есть ли такое резюме в бд- надо чтобы оно было.
-        Object searchKey = getExistedSearchKey(uuid);//помним: что в мапе нет индексов(там беспорядочное распределение пар)
+        SK searchKey = getExistedSearchKey(uuid);//помним: что в мапе нет индексов(там беспорядочное распределение пар)
         //getExistedSearchKey() или возвратится существующий ключ поиска searchKey
         // и он отправится на доудаление
         // или бросится ексепшн что такого резюме нет в ДБ
@@ -142,6 +171,8 @@ public abstract class AbstractStorage implements Storage {
     //то сортировку будем делать только здесь
     @Override
     public List<Resume> getAllSorted() {
+        //в каждом методе добавим логирование:
+        LOG.info("getAllSorted");
         //doCopyAll() наш абстрактный метод- будет поствалять сюда копию
         //коллекции, которую надо отсортировать
         List<Resume> list = doCopyAll();
@@ -161,9 +192,10 @@ public abstract class AbstractStorage implements Storage {
     //это называется ШАБЛОННЫМ МЕТОДОМ - мы переопределим некоторые шаги алгоритма(те мы будем находить индекс
     //в переопределенных getIndex() по разному - перебором и делением на 2)
     public Resume get(String uuid) {
-
+        //в каждом методе добавим логирование:
+        LOG.info("get" + uuid);
         // сначала проверка: есть ли такое резюме в бд- надо чтобы оно было.
-        Object searchKey = getExistedSearchKey(uuid);//помним: что в мапе нет индексов(там беспорядочное распределение пар)
+        SK searchKey = getExistedSearchKey(uuid);//помним: что в мапе нет индексов(там беспорядочное распределение пар)
         //getExistedSearchKey() или возвратится существующий ключ поиска searchKey
         // и он отправится на допоказывание Резюме по его значению полей
         // или бросится ексепшн что такого резюме нет в ДБ
