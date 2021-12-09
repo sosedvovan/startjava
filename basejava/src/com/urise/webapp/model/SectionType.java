@@ -1,5 +1,6 @@
 package com.urise.webapp.model;
 
+//эти константы будут ключами в мапе Resume
 public enum SectionType {
     PERSONAL("Личные качества"),
     OBJECTIVE("Позиция"),

@@ -1,5 +1,7 @@
 package com.urise.webapp.model;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,6 +32,11 @@ public class Resume implements Comparable<Resume> {
     //Todo: в конструктор Resume добавьте второй параметр — fullName:
     private final String fullName;
 
+    //EnumMap - мапа, где ключи- енумы. в его конструктор подается класс
+    private final Map<ContactType, String> contacts = new EnumMap<>(ContactType.class);
+    private final Map<SectionType, Section> sections = new EnumMap<>(SectionType.class);
+
+
 
     public Resume(String fullName) {//
         this(UUID.randomUUID().toString(), fullName);
@@ -56,6 +63,16 @@ public class Resume implements Comparable<Resume> {
     //геттер:
     public String getUuid() {
         return uuid;
+    }
+
+    //геттер для поля- подаем ключ мапы берем значение
+    public String getContact(ContactType type){
+        return contacts.get(type);
+    }
+
+    //геттер для поля- подаем ключ мапы берем значение
+    public Section getSection(SectionType type){
+        return sections.get(type);
     }
 
     /**
