@@ -1,5 +1,7 @@
 package com.urise.webapp.exception;
 
+import java.io.IOException;
+
 /**
 * чтобы класс стал Exception ему надо унаследоваться от RuntimeException или от др Exception.
  * [эксепшен этого класса будем выбрасывать если массив переполнен (Storage overflow),
@@ -35,6 +37,12 @@ public class StorageException extends RuntimeException{
      */
     public StorageException(String message, String uuid) {
         super(message);
+        this.uuid = uuid;
+    }
+
+    //конструктор для 3-х аргументов, выбрасывается в сторадже File
+    public StorageException(String message, String uuid, Exception e) {
+        super(message, e);
         this.uuid = uuid;
     }
 

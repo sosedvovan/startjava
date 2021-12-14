@@ -1,12 +1,19 @@
 package com.urise.webapp.model;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 //класс представляет собой хранилище типа List<Organization> для объектов Organization места работы
-public class OrganizationSection extends Section{
+public class OrganizationSection extends Section {
     private final List<Organization> organizations;
 
+    //при создании объекта в конструктор передаем элементы списка
+    //в этом конструкторе эти элементы кладутся в список
+    //и передаются this() в главный конструктор
+    public OrganizationSection(Organization... organization) {
+        this(Arrays.asList(organization));
+    }
 
     public OrganizationSection(List<Organization> organizations) {
         //зделаем здесь проверку на нуль

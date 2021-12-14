@@ -2,7 +2,7 @@ package com.urise.webapp.storage;
 
 import com.urise.webapp.exception.ExistStorageException;
 import com.urise.webapp.exception.NotExistStorageException;
-import com.urise.webapp.model.Resume;
+import com.urise.webapp.model.*;
 import org.junit.Assert;
 
 import static junit.framework.TestCase.assertTrue;
@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;//статический импор�
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.Month;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,28 +43,54 @@ public abstract class AbstractStorageTest {
     //далее для теста надо будет заполнить storage (тремя) объектами резюме:
     //создадим эти объекты с помощью полей этого класса со static final переменными:
     private static final String UUID_1 = "uuid1"; //созд final переменные String для поля объекта Resume
-    private static final Resume RESUME_1 = new Resume(UUID_1, "Name1");//созд объекты final для массива storage
+    private static final Resume R1;//созд объекты final для массива storage
 
     private static final String UUID_2 = "uuid2"; //для @Before
-    private static final Resume RESUME_2 = new Resume(UUID_2, "Name2");
+    private static final Resume R2;
 
     private static final String UUID_3 = "uuid3"; //static- тк они одинак в каждом тест-методе
-    private static final Resume RESUME_3 = new Resume(UUID_3, "Name3");
+    private static final Resume R3;
 
     private static final String UUID_4 = "uuid4";
-    private static final Resume RESUME_4 = new Resume(UUID_4, "Name4");
+    private static final Resume R4;
 
     /**   ТЕОРИЯ: СТАТИЧЕСКИЕ БЛОКИ:
      * Инициализировать объекты, кот нам нужны для тестов,
      * мы могли бы еще в статическом блоке.
      * те в полях класса можно только объявить переменные след образом:
      * (здесь это объекты для помещения их в хранилище)
-     *
-     * private static final Resume RESUME_1;
-     * private static final Resume RESUME_2;
-     * private static final Resume RESUME_3;
-     * private static final Resume RESUME_4;
-     *
+     */
+    static {
+        R1 = new Resume(UUID_1, "Name1");
+        R2 = new Resume(UUID_2, "Name2");
+        R3 = new Resume(UUID_3, "Name3");
+        R4 = new Resume(UUID_4, "Name4");
+        R1.addContact(ContactType.MAIL, "mail1@ya.ru");
+        R1.addContact(ContactType.PHONE, "11111");
+        R1.addSection(SectionType.OBJECTIVE, new TextSection("Objective1"));
+        R1.addSection(SectionType.PERSONAL, new TextSection("Personal data"));
+        R1.addSection(SectionType.ACHIEVEMENT, new ListSection("Achivment11", "Achivment12", "Achivment13"));
+        R1.addSection(SectionType.QUALIFICATIONS, new ListSection("Java", "SQL", "JavaScript"));
+        R1.addSection(SectionType.EXPERIENCE,
+                new OrganizationSection(
+                        new Organization("Organization11", "http://Organization11.ru",
+                                new Organization.Position(2005, Month.JANUARY, "position1", "content1"),
+                                new Organization.Position(2001, Month.MARCH, 2005, Month.JANUARY, "position2", "content2"))));
+        R1.addSection(SectionType.EDUCATION,
+                new OrganizationSection(
+                        new Organization("Institute", null,
+                                new Organization.Position(1996, Month.JANUARY, 2000, Month.DECEMBER, "aspirant", null),
+                                new Organization.Position(2001, Month.MARCH, 2005, Month.JANUARY, "student", "IT facultet")),
+                        new Organization("Organization12", "http://Organization12.ru")));
+        R2.addContact(ContactType.SKYPE, "skype2");
+        R2.addContact(ContactType.PHONE, "22222");
+        R1.addSection(SectionType.EXPERIENCE,
+                new OrganizationSection(
+                        new Organization("Organization2", "http://Organization2.ru",
+                                new Organization.Position(2015, Month.JANUARY, "position1", "content1"))));
+    }
+
+     /**
      * а в статическом блоке проинициализировать их:
      *
      * static {
@@ -125,9 +152,9 @@ public abstract class AbstractStorageTest {
     @Before//этот метод вызывается перед каждым тестовым методом(задействует созданные выше объекты)
     public void setUp() throws Exception {
         storage.clear();
-        storage.save(RESUME_1);//ctrl + alt + C -> выделить в константы
-        storage.save(RESUME_2);//shift + F6 -> рефактор ренейм
-        storage.save(RESUME_3);
+        storage.save(R1);//ctrl + alt + C -> выделить в константы
+        storage.save(R2);//shift + F6 -> рефактор ренейм
+        storage.save(R3);
     }
     //перед запуском каждого тестового метода будет запускаться метод @Before
     //и очищаться и инициализироваться storage (в нашем случае)
@@ -158,7 +185,7 @@ public abstract class AbstractStorageTest {
         List<Resume> list = storage.getAllSorted();//получим этот массив(он не отсортирован- в порядке занесения)
         Assert.assertEquals(3, list.size());//ожидаем что длина этого массива 3
         //в иквалс у листа сравнивается по элементам:
-        Assert.assertEquals(list, Arrays.asList(RESUME_1, RESUME_2, RESUME_3));
+        Assert.assertEquals(list, Arrays.asList(R1, R2, R3));
 
 
         //Assert.assertEquals(RESUME_2, array[1]);//ожидаем что RESUME_2 лежит во второй ячейке
@@ -168,11 +195,11 @@ public abstract class AbstractStorageTest {
 
     @Test
     public void save() throws Exception{//проверка метода save()
-        storage.save(RESUME_4);//сначала запишем в storage новый элемент
+        storage.save(R4);//сначала запишем в storage новый элемент
         assertSize(4);//теперь можем проверить Size
 
         //теперь найдем объект по значению его поля с пом get() и ожидаем RESUME_4 соответственно
-        assertGet(RESUME_4);//воссп своим служебным прайвет методом
+        assertGet(R4);//воссп своим служебным прайвет методом
         //assertEquals(RESUME_4, storage.get(UUID_4));//иссп статический импорт при обращении к методу
 
     }
@@ -194,9 +221,9 @@ public abstract class AbstractStorageTest {
 
     @Test
     public void get() throws Exception{
-        assertGet(RESUME_1);//воссп своим служебным прайвет методом
-        assertGet(RESUME_2);//там мы по uuid'у достаем RESUME_? из storage
-        assertGet(RESUME_3);//и сравниваем с правильным ответом
+        assertGet(R1);//воссп своим служебным прайвет методом
+        assertGet(R2);//там мы по uuid'у достаем RESUME_? из storage
+        assertGet(R3);//и сравниваем с правильным ответом
     }
 
     //дописали руками- тест на NotExist:
@@ -217,7 +244,7 @@ public abstract class AbstractStorageTest {
 
     @Test(expected = ExistStorageException.class)
     public void saveNotExist() throws Exception{ //проверка нашего собственого ексепшена
-        storage.save(RESUME_1);//пробуем сохранить объект который уже есть в массиве
+        storage.save(R1);//пробуем сохранить объект который уже есть в массиве
     }
 
 
