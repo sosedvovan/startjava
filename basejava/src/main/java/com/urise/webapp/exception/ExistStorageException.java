@@ -1,6 +1,7 @@
 package com.urise.webapp.exception;
 
 /**
+ * //
  * этот эксепшн будем выбрасывать когда объект уже существует(для save()).
  */
 public class ExistStorageException extends StorageException {
