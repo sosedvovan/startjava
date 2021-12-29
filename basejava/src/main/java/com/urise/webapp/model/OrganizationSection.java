@@ -8,7 +8,7 @@ import java.util.Objects;
 public class OrganizationSection extends Section {
     private static final long serialVersionUID = 1L;
 
-    private final List<Organization> organizations;
+    private  List<Organization> organizations;
 
     /**при создании объекта в конструктор передаем элементы списка: напр: (new OrganizationSection("F", "G", "M","L").
     в этом первом конструкторе эти элементы кладутся в список
@@ -22,6 +22,10 @@ public class OrganizationSection extends Section {
         //зделаем здесь проверку на нуль
         Objects.requireNonNull(organizations, "organizations must not be null");
         this.organizations = organizations;
+    }
+
+    //пустой конструктор для Джакарты(final в полях убираем тк пустой конструктор)
+    public OrganizationSection() {
     }
 
     public List<Organization> getOrganizations() {

@@ -5,8 +5,8 @@ import com.urise.webapp.model.Resume;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-//применяем паттерн стратегия
-//интерфеис
+//применяем паттерн стратегия для сериализаций разными способами
+//это интерфеис, реализации которого и есть вариации сериализаций разными способами
 
 public interface StreamSerializer {
 

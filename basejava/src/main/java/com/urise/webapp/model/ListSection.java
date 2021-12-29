@@ -7,7 +7,7 @@ import java.util.Objects;
 public class ListSection extends Section{
     private static final long serialVersionUID = 1L;
 
-    private final List<String> items;
+    private  List<String> items;
 
     /**при создании объекта в первый конструктор передаем элементы списка-варарги: напр: (new ListSection("F", "G", "M","L").
     в этом конструкторе эти элементы кладутся в список
@@ -20,6 +20,10 @@ public class ListSection extends Section{
     public ListSection(List<String> items) {
         Objects.requireNonNull(items, "items must not be null");
         this.items = items;
+    }
+
+    //пустой конструктор для Джакарты(final в полях убираем тк пустой конструктор)
+    public ListSection() {
     }
 
     public List<String> getItems() {

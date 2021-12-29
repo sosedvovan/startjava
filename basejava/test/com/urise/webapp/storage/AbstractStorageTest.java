@@ -1,5 +1,6 @@
 package com.urise.webapp.storage;
 
+import com.urise.webapp.Config;
 import com.urise.webapp.exception.ExistStorageException;
 import com.urise.webapp.exception.NotExistStorageException;
 import com.urise.webapp.model.*;
@@ -35,7 +36,8 @@ public abstract class AbstractStorageTest {
       */
 
     //создали директорию, в которой будем хранить сериализованные объекты модели-Резюме:
-    protected static final File STORAGE_DIR = new File("D:\\startjava\\basejava\\storage");//папка для сериализации(привязали к существующей)
+    //protected static final File STORAGE_DIR = new File("D:\\startjava\\basejava\\storage");//папка для сериализации(привязали к существующей)
+    protected static final File STORAGE_DIR = Config.get().getStorageDir();
     //красной не подчеркнуло-значит можно не засовывать в статик блок инициализации
 
 

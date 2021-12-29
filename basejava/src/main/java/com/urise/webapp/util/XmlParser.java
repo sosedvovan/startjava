@@ -14,8 +14,11 @@ public class XmlParser {
 
     public XmlParser(Class... classesToBeBound) {
         try {
+            //создаем контекст по классам, которые будем сериализовать
             JAXBContext ctx = JAXBContext.newInstance(classesToBeBound);
 
+            //создаем marshaller и unmarshaller и задаем проперти - кодировку и что красиво форматируем,
+            //не в одну строчку, а с отступами
             marshaller = ctx.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
@@ -27,9 +30,10 @@ public class XmlParser {
         }
     }
 
+    //и 2-а метода типизированных(а сам класс не типизирован). и ридер и врайтеры на входах для символьного потока
     public <T> T unmarshall(Reader reader) {
         try {
-            return (T) unmarshaller.unmarshal(reader);
+            return (T) unmarshaller.unmarshal(reader);//reader-символьный поток- откуда будем считывать
         } catch (JAXBException e) {
             throw new IllegalStateException(e);
         }
@@ -37,7 +41,7 @@ public class XmlParser {
 
     public void marshall(Object instance, Writer writer) {
         try {
-            marshaller.marshal(instance, writer);
+            marshaller.marshal(instance, writer);//instance- куда мы будем выводить наш объект
         } catch (JAXBException e) {
             throw new IllegalStateException(e);
         }

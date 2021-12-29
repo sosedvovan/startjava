@@ -1,5 +1,9 @@
 package com.urise.webapp.model;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+
 import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.Map;
@@ -20,6 +24,10 @@ import java.util.UUID;
 //чтобы возвращался отсортированный массив- вернем implements Comparable<Resume>
 
     //Класс- Главная модель- зависит от объектов всех классов в своем пэкедже
+@XmlRootElement//+для Джакарты-XML нужен конструктор по умолчанию, тк она через отражение
+//+Джакарта работает только с сеттерами(а здесь сеттеры только на 2-а поля есть)
+//и чтобы не делать сеттеры добавим Анотацию(тогда начнет работать с полями):
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Resume implements Comparable<Resume>, Serializable {
 
     //---------------------------------------------------------------------------------------------------------
@@ -38,7 +46,7 @@ public class Resume implements Comparable<Resume>, Serializable {
     //(в родителя секций-Секшен не надо: это по наследству не работает)
 
     //Unique identifier
-    private final String uuid;
+    private  String uuid;
     /**
      * <p>
      * сделали поле final -> обязат. нужно инициализировать
@@ -47,7 +55,7 @@ public class Resume implements Comparable<Resume>, Serializable {
      */
 
     //Todo: в конструктор Resume добавьте второй параметр — fullName:
-    private final String fullName;
+    private  String fullName;
 
     //EnumMap - мапа, где ключи- енумы. в его конструктор подается класс
     private final Map<ContactType, String> contacts = new EnumMap<>(ContactType.class);
@@ -55,6 +63,12 @@ public class Resume implements Comparable<Resume>, Serializable {
 
     //---------------------------------------------------------------------------------------------------------
     //                                      КОНСТРУКТОРЫ
+
+
+    //для Джакарты-XML нужен конструктор по умолчанию, тк она через отражение
+    //и мы теряем final в полях
+    public Resume() {
+    }
 
     /**
      * <p>
@@ -83,6 +97,23 @@ public class Resume implements Comparable<Resume>, Serializable {
 
     //-------------------------------------------------------------------------------------------------------
     //геттер:
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public Map<ContactType, String> getContacts() {
+        return contacts;
+    }
+
+    public Map<SectionType, Section> getSections() {
+        return sections;
+    }
+
     public String getUuid() {
         return uuid;
     }
@@ -108,6 +139,9 @@ public class Resume implements Comparable<Resume>, Serializable {
     public void addSection(SectionType type, Section section) {
         sections.put(type, section);
     }
+
+
+
     /**
      * <p>
      * <p>
@@ -125,24 +159,24 @@ public class Resume implements Comparable<Resume>, Serializable {
     //после добавления поля fullName - перегенерирли. В форме генерации Идеа-
     //- поставили галочки-выбрать не нулевые поля- тк у нас в конструкторе
     //есть проверка на null- зачем этим еще загромождать методы equals() и hashCode()
+    //ЕЩЕ РАЗ ПЕРЕГЕНЕРРИМ ТК ДОБАВИЛИ ПОЛЯ_МАПЫ БЕЗ НЕНУЛЕВЫХ ПОЛЕЙ
+    //И ТЕМПЛЕЙТ ВЫБРАЛИ (В ВЫПАД СПИСКЕ НА 1 СТР) - ЯВА 7+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Resume resume = (Resume) o;
-
-        if (!uuid.equals(resume.uuid)) return false;
-        return fullName.equals(resume.fullName);
+        return Objects.equals(uuid, resume.uuid) &&
+                Objects.equals(fullName, resume.fullName) &&
+                Objects.equals(contacts, resume.contacts) &&
+                Objects.equals(sections, resume.sections);
     }
 
     @Override
     public int hashCode() {
-        int result = uuid.hashCode();
-        result = 31 * result + fullName.hashCode();
-        return result;
+        return Objects.hash(uuid, fullName, contacts, sections);
     }
-
 
     //переопределили toString()
 

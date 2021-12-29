@@ -1,6 +1,9 @@
 package com.urise.webapp.model;
 
-import com.urise.webapp.util.DateUtil;
+import com.urise.webapp.util.LocalDateAdapter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -15,12 +18,13 @@ import static com.urise.webapp.util.DateUtil.of;
 
 //класс отобажает собой список мест учебы и работы с линками url
 //имеется внутренний статический класс
+//@XmlAccessorType(XmlAccessType.FIELD)//через родителя наследует
 public class Organization implements Serializable {
     private static final long serialVersionUID = 1L;
     //в модели организация представляет собой хоум-линк(объект класса Link в поле имеет ссылку)
     // и список позиций (список объектов класса Position(внутренний в этом) в полях даты с титрами)
-    private final Link homePage;
-    private List<Position> position = new ArrayList<>();//даты старт-энд периодов работы-учебы с комментариями
+    private  Link homePage;
+    private List<Position> positions = new ArrayList<>();//даты старт-энд периодов работы-учебы с комментариями
 
     //низкоуровневый конструктор с вар-аргами - пробрасывает в следующий чз this
     //получает имя и url для создания объекта линка, и получает перечисление объектов Position для создания Листа с position
@@ -32,7 +36,23 @@ public class Organization implements Serializable {
     //высокоуровневый конструктор
     public Organization(Link homePage, List<Position> position) {
         this.homePage = homePage;//код, проверяющ Link останется в Link
-        this.position = position;
+        this.positions = position;
+    }
+
+    //пустой конструктор для Джакарты(final в полях убираем тк пустой конструктор)
+    public Organization() {
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public Link getHomePage() {
+        return homePage;
+    }
+
+    public List<Position> getPositions() {
+        return positions;
     }
 
     @Override
@@ -43,31 +63,36 @@ public class Organization implements Serializable {
         Organization that = (Organization) o;
 
         if (homePage != null ? !homePage.equals(that.homePage) : that.homePage != null) return false;
-        return position != null ? position.equals(that.position) : that.position == null;
+        return positions != null ? positions.equals(that.positions) : that.positions == null;
     }
 
     @Override
     public int hashCode() {
         int result = homePage != null ? homePage.hashCode() : 0;
-        result = 31 * result + (position != null ? position.hashCode() : 0);
+        result = 31 * result + (positions != null ? positions.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "Organization(" + homePage + ',' + position + ')';
+        return "Organization(" + homePage + ',' + positions + ')';
     }
+
+
 
     /**ДАЛЕЕ ВНУТРЕННИЙ КЛАСС
     в разное время мы можем работать на одних и тех же
     позициях- организациях. из организайшен переносим сюда некот члены класса
     static- тк ему не нужны методы и члены внешнего класса, те не нужна внутренняя ссылка*/
+    @XmlAccessorType(XmlAccessType.FIELD)
     public static class Position implements Serializable{
 
-        private final LocalDate startDate;
-        private final LocalDate endDate;
-        private final String title;
-        private final String description;
+        @XmlJavaTypeAdapter(LocalDateAdapter.class)
+        private  LocalDate startDate;
+        @XmlJavaTypeAdapter(LocalDateAdapter.class)
+        private  LocalDate endDate;
+        private  String title;
+        private  String description;
 
         //сделаем несколько удобных конструкторов
 
@@ -94,7 +119,11 @@ public class Organization implements Serializable {
             this.startDate = startDate;
             this.endDate = endDate;
             this.title = title;
-            this.description = description;
+            this.description = description == null ? "" : description;
+        }
+
+        //пустой конструктор для Джакарты(final в полях убираем тк пустой конструктор)
+        public Position() {
         }
 
         public LocalDate getStartDate() {

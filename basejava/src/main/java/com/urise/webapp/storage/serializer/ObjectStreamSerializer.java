@@ -5,10 +5,14 @@ import com.urise.webapp.model.Resume;
 
 import java.io.*;
 //применяем паттерн стратегия
+//делаем стандартную сериализацию
 /**
  * Created by val on 2017-08-05.
  */
 public class ObjectStreamSerializer implements StreamSerializer {
+
+    //СТОРАДЖИ ОБРАЩАЮТСЯ К ЭТИМ МЕТОДАМ, КОГДА СЕРИАЛИЗУЮТСЯ С ПОМ Стандартной сериализации
+
 
     @Override//сериализуем    ObjectOutputStream бросает 1 ексепшен
     public void doWrite(Resume r, OutputStream os) throws IOException {
