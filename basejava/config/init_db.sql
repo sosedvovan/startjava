@@ -37,3 +37,13 @@ alter table contact
 create unique index contact_uuid_type_index
     on contact (resume_uuid, type);
 
+
+SELECT * FROM resume r
+                  JOIN contact c
+                       ON r.uuid = c.resume_uuid
+WHERE r.uuid = 'fa1aede7-b813-4349-9c6a-8135e95385e2';
+
+SELECT * FROM resume r
+                  left join contact c
+                            ON r.uuid = c.resume_uuid;
+
