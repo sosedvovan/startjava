@@ -1,8 +1,8 @@
 package com.urise.webapp.exception;
 
-import java.io.IOException;
-
 /**
+ * Конструируем объекты Exception:
+ *
 * чтобы класс стал Exception ему надо унаследоваться от RuntimeException или от др Exception.
  * [эксепшен этого класса будем выбрасывать если массив переполнен (Storage overflow),
  * чтобы не создавать еще один спец. для этого].
@@ -24,13 +24,13 @@ public class StorageException extends RuntimeException{
     private final String uuid;
 
     /**
-     * так выглядет конструктор (без сообщения):
+     * так выгледит конструктор (без сообщения):
      * public StorageException(String uuid) {
      * this.uuid = uuid;
      * }
      */
 
-    //конструктор только для одного аргумента мессадж
+    /** конструктор только для одного аргумента message */
     public StorageException(String message) {
         this(message, null, null);//делегируем в высокоуровневый конструктор
        // this.uuid = uuid;
@@ -38,6 +38,7 @@ public class StorageException extends RuntimeException{
     }
 
     /**
+     * Это высокоуровневый конструктор №1
      * лучше сделаем конструктор с сообщением:
      * super указывает на конструктор RuntimeException от которого наследуем этот класс.
      */
@@ -46,7 +47,10 @@ public class StorageException extends RuntimeException{
         this.uuid = uuid;
     }
 
-    /**конструктор для 3-х аргументов, выбрасывается в сторадже File*/
+    /**
+     * Это высокоуровневый конструктор №2
+     * конструктор для 3-х аргументов, выбрасывается в сторадже File
+     */
     public StorageException(String message, String uuid, Exception e) {
         super(message, e);
         this.uuid = uuid;
@@ -59,6 +63,12 @@ public class StorageException extends RuntimeException{
         //this.uuid = null;//все равно uuid инициализируем(в аргументах его нет)
                          //тк uuid final
     }
+
+    /**конструктор только для SQL c одним аргументом Exception e */
+    public StorageException(Exception e) {
+        this(e.getMessage(), e);
+    }
+
 
     /**
      *сделали геттер чтобы поле стало доступным(не бледным):

@@ -1,5 +1,8 @@
 package com.urise.webapp;
 
+import com.urise.webapp.storage.SqlStorage;
+import com.urise.webapp.storage.Storage;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,7 +13,7 @@ import java.util.Properties;
 // из файла resumes.properties
 /**
 //как пользоваться классом:
-//статик объект этого класса INSTANCE создается при загрузке класса классЛоадером
+//статик объект этого класса INSTANCE создается при загрузке класса классЛоадером.
 //через имя класса обращаемся к объекту INSTANCE с пом метода get(): Config.get()
 //на этом объекте INSTANCE - вызываем нужный нам геттер.
 //например:  protected static final File STORAGE_DIR = Config.get().getStorageDir();
@@ -23,10 +26,8 @@ public class Config {
     private static final Config INSTANCE = new Config();//вызываем пустой конструктор, но с кодом в теле
     //и получаем объект этого класса INSTANCE кот несет в себе поля с данными из файла с паролями
 
-    //объект Properties props - в него зачитываем из файла с паролями с пом. InputStream
-    //Properties наследует HashTable(устаревшая Мапа), те обладает всеми методами Мапы + доп свои
-    private Properties props = new Properties();//props- это Мапа + доп методы (Этот класс иссп. для работы с файлами-проперти с паролями)
-    private File storageDir;//это поле инициализируется папкой куда складываем сериализованные объекты
+    private final File storageDir;//это поле инициализируется папкой куда складываем сериализованные объекты
+    private final Storage storage;//это поле инициализируется url, логином и паролем от дб
 
     //извне обращаемся к этому методу(через имя класса)
     //на возврате этого метода(на INSTANCE этого класса) вызываем нужный геттер с паролем или с путём
@@ -40,13 +41,21 @@ public class Config {
     //[для класса AbstractStorageTest]
     private Config() {
         //создаем поток байтиков подавая в него наш файл с паролями
+        //зачитываем в props из is
         try (InputStream is = new FileInputStream(PROPS)) {
-            //зачитываем в props из is
+
+            //объект Properties props - в него зачитываем из файла с паролями с пом. InputStream
+            //Properties наследует HashTable(устаревшая Мапа), те обладает всеми методами Мапы + доп свои
+            //props- это Мапа + доп методы (Этот класс иссп. для работы с файлами-проперти с паролями)
+            Properties props = new Properties();
             props.load(is);
             //возьмем из проперти значение по ключу storage.dir(в файле с паролями лежит) : props.getProperty("storage.dir")
             //и инициализируем этим File storageDir
             storageDir = new File(props.getProperty("storage.dir"));//"storage.dir" это ключик, а этот метод
-                                                                    //возвращает его значение(из файла с паролями)
+                                                                  //возвращает его значение(из файла с паролями)
+
+            //инициализируем поле Storage url, логином и паролем от дб
+            storage = new SqlStorage(props.getProperty("db.url"), props.getProperty("db.user"), props.getProperty("db.password"));
         } catch (IOException e) {
             throw new IllegalStateException("Invalid config file " + PROPS.getAbsolutePath());
         }
@@ -54,5 +63,9 @@ public class Config {
 
     public File getStorageDir() {
         return storageDir;
+    }
+
+    public Storage getStorage() {
+        return storage;
     }
 }

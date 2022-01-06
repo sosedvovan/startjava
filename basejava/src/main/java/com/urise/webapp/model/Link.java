@@ -6,8 +6,9 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import java.io.Serializable;
 import java.util.Objects;
 
-//класс представляет собой имя и url для создания линка,который используется как поле в Organization
-@XmlAccessorType(XmlAccessType.FIELD)
+//класс представляет собой имя и url для создания объекта линка,который используется как поле в Organization
+
+@XmlAccessorType(XmlAccessType.FIELD)//дает возможность для сериализации использовать поля а не геттеры
 public class Link implements Serializable {
     private  String name;
     private  String url;
@@ -19,7 +20,7 @@ public class Link implements Serializable {
     public Link(String name, String url) {
         Objects.requireNonNull(name, "name must not be null");
         this.name = name;
-        //если url == null, отдаем пустую строку
+        //если url == null, отдаем пустую строку, чтобы не завалить тест
         this.url = url == null ? "" : url;
     }
 

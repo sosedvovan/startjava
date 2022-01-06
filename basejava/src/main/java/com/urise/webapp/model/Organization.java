@@ -29,6 +29,7 @@ public class Organization implements Serializable {
     //низкоуровневый конструктор с вар-аргами - пробрасывает в следующий чз this
     //получает имя и url для создания объекта линка, и получает перечисление объектов Position для создания Листа с position
     //создается все это внутри этого конструктора и прередается this()- в высокоуровневый конструктор
+    //Arrays.asList() обычный массив преобразует в список List. Иногда в ArrayList???
     public Organization(String name, String url, Position... position){
         this (new Link(name, url), Arrays.asList(position));
     }
@@ -96,7 +97,8 @@ public class Organization implements Serializable {
 
         //сделаем несколько удобных конструкторов
 
-        //конструктор принимает инт старт-года, старт-месяц из Ява-енума, константу NOW(в кот объект конечной LocalDate endDate,...
+        //конструктор (используем его, если мы работаем на данной позиции в данный момент)
+        //принимает инт старт-года, старт-месяц из Ява-енума, константу NOW(в кот объект конечной LocalDate endDate,...
         //делает из этого объект LocalDate startDate и передает в главный конструктор
         public Position (int startYear, Month startMonth, String title, String description){
             this(of(startYear, startMonth), NOW, title, description);
@@ -104,6 +106,7 @@ public class Organization implements Serializable {
             //кот можем пользоваться для каких-то сравнений
         }
 
+        //конструктор (используем его, если мы в данный момент нигде не работаем)
         //конструктор принимает инт старт-года, старт-месяц из Ява-енума, инт конец-года, конец-месяц из Ява-енума,...
         //делает из этого объекты LocalDate и передает в главный конструктор
         public Position (int startYear, Month startMonth, int endYear, Month endMonth, String title, String description){
@@ -119,7 +122,7 @@ public class Organization implements Serializable {
             this.startDate = startDate;
             this.endDate = endDate;
             this.title = title;
-            this.description = description == null ? "" : description;
+            this.description = description == null ? "" : description;//иначе тест завалит
         }
 
         //пустой конструктор для Джакарты(final в полях убираем тк пустой конструктор)
