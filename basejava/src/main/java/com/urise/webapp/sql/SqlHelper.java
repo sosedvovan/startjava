@@ -1,5 +1,7 @@
 package com.urise.webapp.sql;
 
+import com.urise.webapp.exception.StorageException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -62,4 +64,31 @@ public class SqlHelper {
             throw ExceptionUtil.convertException(e);
         }
     }
+
+    //метод или коммитит трансакцию или роллбечит ее:
+    //принимаем SqlTransaction<T> - кусок кода:
+    public <T> T transactionalExecute(SqlTransaction<T> executor) {
+        //из connectionFactory берем Connection:
+        try (Connection conn = connectionFactory.getConnection()) {
+            try {
+                //setAutoCommit(true) означает, что после каждого execute - коммитимся, а у нас тут false
+                //те отключаем автокомичинье, тк хотим сделать несколько операций execute в одном Connection:
+                conn.setAutoCommit(false);
+                //далее выполняем пришедший кусок кода(стратегия)- те операции с Connection(там будет несколько execute)
+                T res = executor.execute(conn);
+                //и коммитим сами этот Connection:
+                conn.commit();
+                return res;
+            } catch (SQLException e) {
+                //если в дб случается SQLException при нескольких операций execute, то откатываем:
+                conn.rollback();
+                //и выбрасываем наше сконвертируемое исключение:
+                throw ExceptionUtil.convertException(e);
+            }
+        } catch (SQLException e) {
+            //этот эксепшен для rollback(), если в нем что-то не так случится:
+            throw new StorageException(e);
+        }
+    }
+
 }

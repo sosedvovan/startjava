@@ -110,27 +110,53 @@ public class SqlStorage implements Storage{
 //        });
 //    }
 
-    @Override
+//    @Override //ДОБАВИЛИ СОХРАНЕНИЕ С КОНТАКТАМИ:
+//    public void save(Resume r) {
+//        //если из типизированного метода мы ничего не хотим возратить, воспользуемся <Void>
+//        //здесь в лямбде ps-это объект PreparedStatement со стрингой содержащей =???,
+//        //и после оператора -> замещаем =? на значения и ps.execute()(кусок кода отправляем в др метод)
+//        sqlHelper.<Void>execute("INSERT INTO resume (uuid, full_name) VALUES (?,?)", ps -> {
+//            ps.setString(1, r.getUuid());
+//            ps.setString(2, r.getFullName());
+//            ps.execute();
+//            return null;
+//        });
+//        //для добавления контактов в Resume r создадим еще один PreparedStatement:
+//        //так не эффективно, тк получается несколько запросов в дб (далее исправим)
+//        for (Map.Entry<ContactType, String> e : r.getContacts().entrySet()) {//на мапе вызываем entrySet()
+//            sqlHelper.<Void>execute("INSERT INTO contact (resume_uuid, type, value) VALUES (?,?,?)", ps -> {
+//                ps.setString(1, r.getUuid());//добавляем в запрос Uuid
+//                ps.setString(2, e.getKey().name());//добавляем в запрос енум(контакт) типа PHONE или SKYPE(это ключ мапы контактов)
+//                ps.setString(3, e.getValue());//добавляем в запрос енум(контакт) строковое значение от енума-ключа типа +79846363748
+//                ps.execute();
+//                return null;
+//            });
+//        }
+//    }
+
+    @Override //СДЕЛАЛИ СОХРАНЕНИЕ ЧЕРЕЗ ТРАНСАКЦИЮ:
     public void save(Resume r) {
-        //если из типизированного метода мы ничего не хотим возратить, воспользуемся <Void>
-        //здесь в лямбде ps-это объект PreparedStatement со стрингой содержащей =???,
-        //и после оператора -> замещаем =? на значения и ps.execute()(кусок кода отправляем в др метод)
-        sqlHelper.<Void>execute("INSERT INTO resume (uuid, full_name) VALUES (?,?)", ps -> {
-            ps.setString(1, r.getUuid());
-            ps.setString(2, r.getFullName());
-            ps.execute();
-            return null;
-        });
-        //для добавления контактов в Resume r создадим еще один PreparedStatement:
-        //так не эффективно, тк получается несколько запросов в дб (далее исправим)
-        for (Map.Entry<ContactType, String> e : r.getContacts().entrySet()) {//на мапе вызываем entrySet()
-            sqlHelper.<Void>execute("INSERT INTO contact (resume_uuid, type, value) VALUES (?,?,?)", ps -> {
-                ps.setString(1, r.getUuid());//добавляем в запрос Uuid
-                ps.setString(2, e.getKey().name());//добавляем в запрос енум(контакт) типа PHONE или SKYPE(это ключ мапы контактов)
-                ps.setString(3, e.getValue());//добавляем в запрос енум(контакт) строковое значение от енума-ключа типа +79846363748
-                return null;
-            });
-        }
+        //на нашем conn - делаем запрос для записи в таблицу resume полей: uuid и full_name:
+        sqlHelper.transactionalExecute(conn -> {
+                    try (PreparedStatement ps = conn.prepareStatement("INSERT INTO resume (uuid, full_name) VALUES (?,?)")) {
+                        ps.setString(1, r.getUuid());
+                        ps.setString(2, r.getFullName());
+                        ps.execute();//возможно ошибка- заменить надо на addBatch()
+                    }
+            //на том же conn - делаем запрос для записи в таблицу contact полей: resume_uuid, type, value:
+                    try (PreparedStatement ps = conn.prepareStatement("INSERT INTO contact (resume_uuid, type, value) VALUES (?,?,?)")) {
+                        for (Map.Entry<ContactType, String> e : r.getContacts().entrySet()) {
+                            ps.setString(1, r.getUuid());
+                            ps.setString(2, e.getKey().name());
+                            ps.setString(3, e.getValue());
+                            //операцию добавим в conn для исполнения, но пока не исполняем: addBatch():
+                            ps.addBatch();
+                        }
+                        ps.executeBatch();
+                    }
+                    return null;
+                }
+        );
     }
 
     @Override
