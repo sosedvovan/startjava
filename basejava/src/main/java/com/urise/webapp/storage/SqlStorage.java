@@ -7,9 +7,11 @@ import com.urise.webapp.model.Resume;
 import com.urise.webapp.sql.ConnectionFactory;
 import com.urise.webapp.sql.SqlExecutor;
 import com.urise.webapp.sql.SqlHelper;
+import com.urise.webapp.sql.SqlTransaction;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -80,20 +82,75 @@ public class SqlStorage implements Storage{
                 });
     }
 
+    //сначала обновляем full_name по его uuid'у,
+    //а при добавлении контактов можно реализовать сложную логику- проверки: а сущ. ли такой контакт,
+    //а сущ. и изменен ли, а может вооюще такой не существовал
+    //но можно пойти путем попроще- сначала удалить все контакты, а потом записать пришедшие
+    //для этого создадим доп методы deleteContacts и insertContact
+    //ДАЛЕЕ ПЕРЕДЕЛАЕМ : БУДЕМ ЧЗ ТРАНЗАКЦИИ тк ps у нас один и он будет обновлять full_name
+    //те исп. метод transactionalExecute а не execute в sqlHelper
+//    @Override
+//    public void update(Resume r) {
+//        sqlHelper.execute("UPDATE resume SET full_name = ? WHERE uuid = ?", new SqlExecutor<Object>() {
+//            @Override//этот переопределенный метод- кусок кода, кот. мы передаем методу sqlHelper.execute
+//            //вместе со стрингой с недоделанным запросом(= ? = ?)
+//            //
+//            public Object execute(PreparedStatement ps) throws SQLException {
+//                //доделываем недоделанный запрос:
+//                ps.setString(1, r.getFullName());
+//                ps.setString(2, r.getUuid());
+//                if (ps.executeUpdate() == 0) {//вызываем executeUpdate() (если неудачно, возвратится 0 и выбросим ексепшен)
+//                    throw new NotExistStorageException(r.getUuid());
+//                }
+//                deleteContacts(conn, r);
+//                insertContact(conn, r);
+//                return null;//при update() ничего возвращать из метода не надо
+//            }
+//        });
+//    }
+
     @Override
     public void update(Resume r) {
-        sqlHelper.execute("UPDATE resume SET full_name = ? WHERE uuid = ?", new SqlExecutor<Object>() {
-            @Override//этот переопределенный метод- кусок кода, кот. мы передаем методу sqlHelper.execute
-            //вместе со стрингой с недоделанным запросом(= ? = ?)
-            //
-            public Object execute(PreparedStatement ps) throws SQLException {
-                //доделываем недоделанный запрос:
-                ps.setString(1, r.getFullName());
-                ps.setString(2, r.getUuid());
-                if (ps.executeUpdate() == 0) {//вызываем executeUpdate() (если неудачно, возвратится 0 и выбросим ексепшен)
-                    throw new NotExistStorageException(r.getUuid());
+        sqlHelper.transactionalExecute(new SqlTransaction<Object>() {
+            @Override
+            public Object execute(Connection conn) throws SQLException {
+                try (PreparedStatement ps = conn.prepareStatement("UPDATE resume SET full_name = ? WHERE uuid = ?")) {
+                    ps.setString(1, r.getFullName());
+                    ps.setString(2, r.getUuid());
+                    //executeUpdate возвращает кол-во записей, которое он обновил:
+                    //у нас uuid это primaryKey, значит вернется или 1 или 0
+                    if (ps.executeUpdate() != 1) {
+                        throw new NotExistStorageException(r.getUuid());
+                    }
                 }
-                return null;//при update() ничего возвращать из метода не надо
+                deleteContacts(conn, r);
+                insertContact(conn, r);
+                return null;
+            }
+        });
+    }
+
+    //всё содержимое метода перенесли из save.
+    private void insertContact(Connection conn, Resume r) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement("INSERT INTO contact (resume_uuid, type, value) VALUES (?,?,?)")) {
+            for (Map.Entry<ContactType, String> e : r.getContacts().entrySet()) {
+                ps.setString(1, r.getUuid());
+                ps.setString(2, e.getKey().name());
+                ps.setString(3, e.getValue());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+    }
+
+    //этот метод исп. при update- сначала удаляем контакты (потом записываем вновь пришедшие)
+    private void deleteContacts(Connection conn, Resume r) {
+        sqlHelper.execute("DELETE  FROM contact WHERE resume_uuid=?", new SqlExecutor<Object>() {
+            @Override
+            public Object execute(PreparedStatement ps) throws SQLException {
+                ps.setString(1, r.getUuid());
+                ps.execute();
+                return null;
             }
         });
     }
@@ -144,16 +201,8 @@ public class SqlStorage implements Storage{
                         ps.execute();//возможно ошибка- заменить надо на addBatch()
                     }
             //на том же conn - делаем запрос для записи в таблицу contact полей: resume_uuid, type, value:
-                    try (PreparedStatement ps = conn.prepareStatement("INSERT INTO contact (resume_uuid, type, value) VALUES (?,?,?)")) {
-                        for (Map.Entry<ContactType, String> e : r.getContacts().entrySet()) {
-                            ps.setString(1, r.getUuid());
-                            ps.setString(2, e.getKey().name());
-                            ps.setString(3, e.getValue());
-                            //операцию добавим в conn для исполнения, но пока не исполняем: addBatch():
-                            ps.addBatch();
-                        }
-                        ps.executeBatch();
-                    }
+            //перенесли эту часть кода в отдельный метод insertContact
+                   insertContact(conn, r);
                     return null;
                 }
         );
@@ -173,19 +222,42 @@ public class SqlStorage implements Storage{
         });
     }
 
+    //ДАЛЕЕ ПЕРЕПИШЕМ, ЧТОБЫ И КОНТАКТЫ ДОСТАВАТЬ через JOIN будем это делать
+    //можно еще через 2- запроса(получить full_name, потом контакты, потом склеить)
+//    @Override
+//    public List<Resume> getAllSorted() {
+//        //sql запрос с сортировкой ORDER BY
+//        return sqlHelper.execute("SELECT * FROM resume r ORDER BY full_name,uuid", ps -> {
+//            ResultSet rs = ps.executeQuery();
+//            List<Resume> resumes = new ArrayList<>();
+//            //next() в классе ResultSet не только проверяет- есть ли еще след. запись (возвр true)
+//            //но и передвигает курсор, если такая запись есть:
+//            while (rs.next()) {
+//                //rs.getString() берет значение ячейки в таблице
+//                resumes.add(new Resume(rs.getString("uuid"), rs.getString("full_name")));
+//            }
+//            return resumes;
+//        });
+//    }
+
     @Override
     public List<Resume> getAllSorted() {
-        //sql запрос с сортировкой ORDER BY
-        return sqlHelper.execute("SELECT * FROM resume r ORDER BY full_name,uuid", ps -> {
+        return sqlHelper.execute("" +
+                "   SELECT * FROM resume r\n" +
+                "LEFT JOIN contact c ON r.uuid = c.resume_uuid\n" +
+                "ORDER BY full_name, uuid", ps -> {
             ResultSet rs = ps.executeQuery();
-            List<Resume> resumes = new ArrayList<>();
-            //next() в классе ResultSet не только проверяет- есть ли еще след. запись (возвр true)
-            //но и передвигает курсор, если такая запись есть:
+            Map<String, Resume> map = new LinkedHashMap<>();
             while (rs.next()) {
-                //rs.getString() берет значение ячейки в таблице
-                resumes.add(new Resume(rs.getString("uuid"), rs.getString("full_name")));
+                String uuid = rs.getString("uuid");
+                Resume resume = map.get(uuid);
+                if (resume == null) {
+                    resume = new Resume(uuid, rs.getString("full_name"));
+                    map.put(uuid, resume);
+                }
+                addContact(rs, resume);
             }
-            return resumes;
+            return new ArrayList<>(map.values());
         });
     }
 

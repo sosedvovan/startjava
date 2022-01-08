@@ -74,9 +74,10 @@ public class SqlHelper {
                 //setAutoCommit(true) означает, что после каждого execute - коммитимся, а у нас тут false
                 //те отключаем автокомичинье, тк хотим сделать несколько операций execute в одном Connection:
                 conn.setAutoCommit(false);
-                //далее выполняем пришедший кусок кода(стратегия)- те операции с Connection(там будет несколько execute)
+                //далее выполняем пришедший кусок кода(стратегия)- те операции с Connection
+                // (в нем будет один или несколько ps.execute...te)
                 T res = executor.execute(conn);
-                //и коммитим сами этот Connection:
+                //и коммитим сами этот Connection в дб:
                 conn.commit();
                 return res;
             } catch (SQLException e) {
