@@ -15,6 +15,7 @@ import org.junit.Test;
 import java.io.File;
 import java.time.Month;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -79,8 +80,12 @@ public abstract class AbstractStorageTest {
 
         //addContact и addSection это сеттеры для полей с Мапой в объектах Резюме:
 
-//        R1.addContact(ContactType.MAIL, "mail1@ya.ru");
-//        R1.addContact(ContactType.PHONE, "11111");
+        R1.addContact(ContactType.MAIL, "mail1@ya.ru");
+        R1.addContact(ContactType.PHONE, "11111");
+
+        R4.addContact(ContactType.PHONE, "44444");
+        R4.addContact(ContactType.SKYPE, "Skype");
+
 //        R1.addSection(SectionType.OBJECTIVE, new TextSection("Objective1"));
 //        R1.addSection(SectionType.PERSONAL, new TextSection("Personal data"));
 //        R1.addSection(SectionType.ACHIEVEMENT, new ListSection("Achivment11", "Achivment12", "Achivment13"));
@@ -186,6 +191,9 @@ public abstract class AbstractStorageTest {
     @Test
     public void update() throws Exception{//тест метода update
         Resume newResume = new Resume(UUID_1, "New Name");//создали совершенно новый объект Resume
+        R1.addContact(ContactType.MAIL, "mail1@google.com");//пытаемся еще и контакты обновить
+        R1.addContact(ContactType.SKYPE, "NewSkype");
+        R1.addContact(ContactType.MOBILE, "+7 921 222-22-22");
         storage.update(newResume);//действие - записали этот объект поверх старого в хранилище storage
         assertTrue(newResume.equals(storage.get(UUID_1)));//запросили из хранилища этот объект Resume по
         // значению его поля и сравнили с ожидаемым-кот только что создали
@@ -198,8 +206,10 @@ public abstract class AbstractStorageTest {
         //действие: storage.getAllSorted() - должен вернуть копию storage
         List<Resume> list = storage.getAllSorted();//получим этот массив(он не отсортирован- в порядке занесения)
         Assert.assertEquals(3, list.size());//ожидаем что длина этого массива 3
-        //и дополнительно в иквалс у листа сравниваем его элементам с теми, что @Before положил:
-        Assert.assertEquals(list, Arrays.asList(R1, R2, R3));
+        List<Resume> sortedResumes = Arrays.asList(R1, R2, R3);//создаем новый лист с эталонными резюме
+        Collections.sort(sortedResumes);//сортируем новый лист с эталонными резюме
+        //и дополнительно сравниваем с эталонные резюме с теми, что вернул метод storage.getAllSorted():
+        Assert.assertEquals(sortedResumes, list);//здесь аргументы нельзя путать местами
 
         //Assert.assertEquals(RESUME_2, array[1]);//ожидаем что RESUME_2 лежит во второй ячейке
         //Assert.assertEquals(RESUME_3, array[2]);//ожидаем что RESUME_3 лежит в третьей ячейке

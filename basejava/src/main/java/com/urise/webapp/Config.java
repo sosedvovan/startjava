@@ -21,7 +21,7 @@ import java.util.Properties;
 
 public class Config {
     //константа с расположением файла с паролями
-    private static final File PROPS = new File("config\\resumes.properties");
+    private static final File PROPS = new File("basejava\\config\\resumes.properties");
     //объект этого класса-синглетон(тк однопоточка у нас)
     private static final Config INSTANCE = new Config();//вызываем пустой конструктор, но с кодом в теле
     //и получаем объект этого класса INSTANCE кот несет в себе поля с данными из файла с паролями

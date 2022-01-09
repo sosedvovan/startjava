@@ -1,0 +1,56 @@
+в папке bin запускаем терминал (пкм с шифтом)
+пишем --- catalina.bat start ---
+запускается...
+в браузере --- localhost:8080 ---   посмотрим на страничку...
+
+запустим менеджер  --- localhost:8080/manager  ----
+в нем можно посмотреть- какие приложения задеплоины
+если не проходит авторизация в менеджере заходим на localhost:8080/manager/html
+и скопируем:
+
+
+Для доступа к Tomсat Manager добавьте в конфигурацию Tomcat TOMCAT_HOME\conf\tomcat-users.xml права:
+<user username="tomcat" password="tomcat" roles="tomcat,manager-gui,admin-gui"/>
+
+те в файле tomcat-users.xml раскометить(УДАЛИТЬ ЭТОТ БЛОК) <role... и <user...
+и вместо этого блока добавить  --- <user username="tomcat" password="tomcat" roles="tomcat,manager-gui,admin-gui"/>  ---
+
+пробуем перезапустить TomCat. если не перезапускается, значит порт 8080 занят- убиваем процессы java в диспетчере
+и еще раз перезапускаемся
+эту ошибку можно отследить в логах:  -- папка logs  ---
+там запускаем файл catalina.ДАТА
+в нем может быть прописанна ошибка порта 8080 (ищем чз Ctrl+F)
+и ошибка DindException: Address already in use: bind
+
+
+при запуске в CMD видим:
+C:\apache-tomcat-9.0.52\bin>catalina.bat start
+Using CATALINA_BASE:   "C:\apache-tomcat-9.0.52"
+Using CATALINA_HOME:   "C:\apache-tomcat-9.0.52"
+Using CATALINA_TMPDIR: "C:\apache-tomcat-9.0.52\temp"
+Using JRE_HOME:        "C:\java\jdk"
+Using CLASSPATH:       "C:\apache-tomcat-9.0.52\bin\bootstrap.jar;C:\apache-tomcat-9.0.52\bin\tomcat-juli.jar"
+Using CATALINA_OPTS:   ""
+
+
+
+
+
+то, что написанно далее по настройке JAVA_HOME смотри в отдельном текстовом файле
+JAVA_HOME:
+WIN+R: --- control /name Microsoft.system ---   выбрать - дополнительные параметры системы
+
+
+проверить , что JAVA_HOME установленна правильно(прочесть JAVA_HOME):
+
+Командная строка Windows ( cmd.exe )
+C:\>echo %JAVA_HOME%
+в ответ: C:\Program Files\Java\jdk1.7.0_80
+
+в Windows 10 powershell:
+команда:  --- Get-ChildItem Env:JAVA_HOME ---
+в ответ:
+Name                           Value
+----                           -----
+JAVA_HOME                      C:\Program Files\Java\jdk1.7.0_80
+  

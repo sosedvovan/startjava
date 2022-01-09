@@ -71,12 +71,17 @@ public class SqlStorage implements Storage{
                         throw new NotExistStorageException(uuid);
                     }//если в ResultSet чтото есть - соберем объект Resume
                     Resume r = new Resume(uuid, rs.getString("full_name"));
-                    //
-                    do {//и добавим в этот объект Resume  (r.addContact) вытащив контакты из ResultSet
-                        String value = rs.getString("value");
-                        ContactType type = ContactType.valueOf(rs.getString("type"));
-                        r.addContact(type, value);
-                    } while (rs.next());//делаем до тех пор, пока есть записи в ResultSet
+
+                    do {
+                        addContact(rs, r);
+                    } while (rs.next());
+
+//                    ПЕРЕНЕСЛИ ЭТОТ КОД В служебный addContact() - убрали повторяющийся код (цикл do-while оставили)
+//                    do {//и добавим в этот объект Resume  (r.addContact) вытащив контакты из ResultSet
+//                        String value = rs.getString("value");
+//                        ContactType type = ContactType.valueOf(rs.getString("type"));
+//                        r.addContact(type, value);
+//                    } while (rs.next());//делаем до тех пор, пока есть записи в ResultSet
 
                     return r;
                 });
@@ -222,7 +227,7 @@ public class SqlStorage implements Storage{
         });
     }
 
-    //ДАЛЕЕ ПЕРЕПИШЕМ, ЧТОБЫ И КОНТАКТЫ ДОСТАВАТЬ через JOIN будем это делать
+    //ДАЛЕЕ ПЕРЕПИШЕМ, ЧТОБЫ И КОНТАКТЫ ДОСТАВАТЬ. через LEFT JOIN будем это делать
     //можно еще через 2- запроса(получить full_name, потом контакты, потом склеить)
 //    @Override
 //    public List<Resume> getAllSorted() {
@@ -242,23 +247,44 @@ public class SqlStorage implements Storage{
 
     @Override
     public List<Resume> getAllSorted() {
-        return sqlHelper.execute("" +
+        //1 в sqlHelper.execute() отправляем JOIN запрос(склеим 2-е таблицы по uuid)
+        //2 и также отправляем кусок кода в котором ResultSet получает результирующую таблицу,
+        //3 создаем новую служебную мапу, она LinkedHashMap чтобы сохраняла порядок занесения
+        //  тк заносится будет уже отсортированные данные с пом ORDER BY
+        //4 далее в цикле while:
+        //5 переменной String uuid присваиваем значение "uuid" из очередной ячейки из таблицы из ResultSet
+        //6 создаем объект Resume resume пытаясь взять из его из служебной мапы  по String uuid
+        //такого объекта в мапе не будет, соответственно Resume resume = null
+        //7 и далее в предикате if видим, что нет такого резюме (resume == null)
+        //8 и далее собираем объект Resume resume
+        //9 и кладем его в служебную мапу
+        //10 далее не выходя из цикла while вызываем addContact в котром к текущему Resume resume добавляем контакты
+        //11 из куска кода возвращаем новый ArrayList с объектами Resume resume
+        return sqlHelper.execute("" +    //1
                 "   SELECT * FROM resume r\n" +
                 "LEFT JOIN contact c ON r.uuid = c.resume_uuid\n" +
-                "ORDER BY full_name, uuid", ps -> {
-            ResultSet rs = ps.executeQuery();
-            Map<String, Resume> map = new LinkedHashMap<>();
-            while (rs.next()) {
-                String uuid = rs.getString("uuid");
-                Resume resume = map.get(uuid);
-                if (resume == null) {
-                    resume = new Resume(uuid, rs.getString("full_name"));
-                    map.put(uuid, resume);
+                "ORDER BY full_name, uuid", ps -> {   //2
+            ResultSet rs = ps.executeQuery();   //2
+            Map<String, Resume> map = new LinkedHashMap<>();  //3
+            while (rs.next()) {  //4
+                String uuid = rs.getString("uuid");   //5
+                Resume resume = map.get(uuid);  //6
+                if (resume == null) { //7
+                    resume = new Resume(uuid, rs.getString("full_name")); //8
+                    map.put(uuid, resume);  //9
                 }
-                addContact(rs, resume);
+                addContact(rs, resume); //11
             }
             return new ArrayList<>(map.values());
         });
+    }
+
+    //в этот метод, код переехал из get тк этот код повторяется и в getAllSorted
+    private void addContact(ResultSet rs, Resume r) throws SQLException {
+        String value = rs.getString("value");
+        if (value != null) {
+            r.addContact(ContactType.valueOf(rs.getString("type")), value);
+        }
     }
 
     @Override
