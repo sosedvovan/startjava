@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 //этот класс в файл-сериализации при сериализации будет добавлять две переменных-CLASSNAME и INSTANCE
 //(см внизу пример этого файла- там ищи слова CLASSNAME и INSTANCE и все будет понятно)
 //и при десериализации это поможет Json правильно создать объекты наследников класса Section
+//те для наследования
 public class JsonSectionAdapter<T> implements JsonSerializer<T>, JsonDeserializer<T> {//имплементим и то и это и реализуем их абстракты
     private static final String CLASSNAME = "CLASSNAME";
     private static final String INSTANCE = "INSTANCE";

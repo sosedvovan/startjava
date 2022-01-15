@@ -6,6 +6,7 @@ import com.urise.webapp.exception.NotExistStorageException;
 import com.urise.webapp.model.*;
 import org.junit.Assert;
 
+import static com.urise.webapp.TestData.*;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;//статический импорт чтобы не писать имя класса
                                                 //перед его методом
@@ -50,19 +51,20 @@ public abstract class AbstractStorageTest {
     //сюда будем подставлять объект проверяемого класса(при вызове конструкторов дочек этого класса)
     //для инициализации этого поля исп конструктор(то дочки обязанны иметь конструктор, дающий определенную реализацию storage)
 
+    //ТЕСТОВЫЕ ДАННЫЕ ПЕРЕНЕСЛИ В ОТДЕЛЬНЫЙ КЛАСС
     //далее для теста надо будет заполнить storage (тремя) объектами резюме:
     //создадим эти объекты с помощью ПОЛЕЙ этого класса со static final переменными:
-    private static final String UUID_1 = UUID.randomUUID().toString(); //созд final переменные String для поля uuid объекта Resume
-    private static final Resume R1;//декларируеи объекты класса Резюме (для работы с ними в массиве storage)
-
-    private static final String UUID_2 = UUID.randomUUID().toString(); //для @Before
-    private static final Resume R2;
-
-    private static final String UUID_3 = UUID.randomUUID().toString(); //static- тк они одинак в каждом тест-методе
-    private static final Resume R3;
-
-    private static final String UUID_4 = UUID.randomUUID().toString();
-    private static final Resume R4;
+//    private static final String UUID_1 = UUID.randomUUID().toString(); //созд final переменные String для поля uuid объекта Resume
+//    private static final Resume R1;//декларируеи объекты класса Резюме (для работы с ними в массиве storage)
+//
+//    private static final String UUID_2 = UUID.randomUUID().toString(); //для @Before
+//    private static final Resume R2;
+//
+//    private static final String UUID_3 = UUID.randomUUID().toString(); //static- тк они одинак в каждом тест-методе
+//    private static final Resume R3;
+//
+//    private static final String UUID_4 = UUID.randomUUID().toString();
+//    private static final Resume R4;
 
     /**   ТЕОРИЯ: СТАТИЧЕСКИЕ БЛОКИ:
      * Инициализировать объекты(обращение к конструкторам), кот нам нужны для тестов,
@@ -72,19 +74,19 @@ public abstract class AbstractStorageTest {
      * для этого в полях класса только объявляем переменные.
      * (здесь это объекты для помещения их в хранилище)
      */
-    static {
-        R1 = new Resume(UUID_1, "Name1");
-        R2 = new Resume(UUID_2, "Name2");
-        R3 = new Resume(UUID_3, "Name3");
-        R4 = new Resume(UUID_4, "Name4");
-
-        //addContact и addSection это сеттеры для полей с Мапой в объектах Резюме:
-
-        R1.addContact(ContactType.MAIL, "mail1@ya.ru");
-        R1.addContact(ContactType.PHONE, "11111");
-
-        R4.addContact(ContactType.PHONE, "44444");
-        R4.addContact(ContactType.SKYPE, "Skype");
+//    static {
+//        R1 = new Resume(UUID_1, "Name1");
+//        R2 = new Resume(UUID_2, "Name2");
+//        R3 = new Resume(UUID_3, "Name3");
+//        R4 = new Resume(UUID_4, "Name4");
+//
+//        //addContact и addSection это сеттеры для полей с Мапой в объектах Резюме:
+//
+//        R1.addContact(ContactType.MAIL, "mail1@ya.ru");
+//        R1.addContact(ContactType.PHONE, "11111");
+//
+//        R4.addContact(ContactType.PHONE, "44444");
+//        R4.addContact(ContactType.SKYPE, "Skype");
 
 //        R1.addSection(SectionType.OBJECTIVE, new TextSection("Objective1"));
 //        R1.addSection(SectionType.PERSONAL, new TextSection("Personal data"));
@@ -107,7 +109,7 @@ public abstract class AbstractStorageTest {
 //                new OrganizationSection(
 //                        new Organization("Organization2", "http://Organization2.ru",
 //                                new Organization.Position(2015, Month.JANUARY, "position1", "content1"))));
-    }
+//    }
 
      /**
      * а в статическом блоке проинициализировать их:

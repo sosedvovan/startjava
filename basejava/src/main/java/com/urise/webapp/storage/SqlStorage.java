@@ -1,13 +1,15 @@
 package com.urise.webapp.storage;
 
 import com.urise.webapp.exception.NotExistStorageException;
-import com.urise.webapp.exception.StorageException;
 import com.urise.webapp.model.ContactType;
 import com.urise.webapp.model.Resume;
+import com.urise.webapp.model.Section;
+import com.urise.webapp.model.SectionType;
 import com.urise.webapp.sql.ConnectionFactory;
 import com.urise.webapp.sql.SqlExecutor;
 import com.urise.webapp.sql.SqlHelper;
 import com.urise.webapp.sql.SqlTransaction;
+import com.urise.webapp.util.JsonParser;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,18 +17,34 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-//часть методов AbstractStorage не потребуется
-//поэтому implements Storage
-public class SqlStorage implements Storage{
+//часть методов AbstractStorage не потребуется(geSearchKey, )
+//поэтому сразу implements от Storage, а не от AbstractStorage.
 
-    //поле с классом SqlHelper, в методе которого делаем preparedStatement.execute()
-    //объект класса SqlHelper содержит в себе поле ConnectionFactory, абстракт которого возвращает Connection
+//в методах этого класса мы, по большому счету, будем доделывать запос(вопросики??? заменять пришедшими извне значениями)
+//и отправлять готовый prepareStatement в методы класса SqlHelper на выполнение
+
+public class SqlStorage implements Storage {
+
+    //декларируем поле с объектом класса SqlHelper.
+    //для его инициализации в конструкторе надо реализовать абстракт getConnection()
+    //нашего функционального интерфейса ConnectionFactory
     public final SqlHelper sqlHelper;
+
+    //------------------------------------------------------------------------------------------------------------------
 
     //конструктор- создаем объект этого класса SqlStorage, передавая в аргументы логины-пароли.
     //объект этого класса будет содержать в себе объект класса SqlHelper, который мы инициализируем нужным нам подключением.
     //SqlHelper в этом конструкторе инициализируется реализацией connectionFactory, абстракт которого возвращает Connection.
     public SqlStorage(String dbUrl, String dbUser, String dbPassword) {
+
+        //подгрузим драйвер, чтобы он точно нашелся(если не так(взяли с собой) то драйвер нужно будет подложить в Томкат
+        // стобы класс-лоадер Томката его увидел)
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+
         sqlHelper = new SqlHelper(new ConnectionFactory() {
             @Override
             public Connection getConnection() throws SQLException {
@@ -35,12 +53,16 @@ public class SqlStorage implements Storage{
         });
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    //                                        clear():
     //в методе clear() вызывается первый перегруженный метод sqlHelper.execute()
     @Override
     public void clear() {
         sqlHelper.execute("DELETE FROM resume");
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    //                                        get():
     //в этом методе вызываем второй перегруженный метод sqlHelper.execute()
     //передавая ему в аргументы стрингу с запросом и реализацию SqlExecutor<T>(кусок уместного в данном случае кода)
     //в этом вызванном методе произийдет подключение к дб, создание PreparedStatement ps, передача в ps запроса с =?,
@@ -54,38 +76,67 @@ public class SqlStorage implements Storage{
     //LEFT JOIN - в результирующую таблицу войдут пересекающиеся области и вся первая таблица
     //RIGHT JOIN - в результирующую таблицу войдут пересекающиеся области и вся вторая таблица
     //есть еще outer JOIN(полное объединение) - редко используют, как и RIGHT JOIN, как и Cross JOIN(перемножение)
-   //этот запрос возвращает одну объединенную таблицу-один ко многим(резюме одно, а контактов много).
+    //этот запрос возвращает одну объединенную таблицу-один ко многим(резюме одно, а контактов много).
     //если здесь использовать просто JOIN (а не LEFT JOIN), то резюме без контактов не вернутся в результирующую таблицу
     //тк в таблице контактов они не представленны, а JOIN возвращает пересекающиеся области.
+//    @Override
+//    public Resume get(String uuid) {
+//        return sqlHelper.execute("" +
+//                        "    SELECT * FROM resume r " +
+//                        " LEFT JOIN contact c " +
+//                        "        ON r.uuid = c.resume_uuid " +
+//                        "     WHERE r.uuid =? ",
+//                ps -> {
+//                    ps.setString(1, uuid);
+//                    ResultSet rs = ps.executeQuery();
+//                    if (!rs.next()) {
+//                        throw new NotExistStorageException(uuid);
+//                    }//если в ResultSet чтото есть - соберем объект Resume
+//                    Resume r = new Resume(uuid, rs.getString("full_name"));
+//
+//                    do {
+//                        addContact(rs, r);
+//                    } while (rs.next());
+//                    return r;
+//                });
+//    }
+
+    //перепишем метод get не через LEFT JOIN, а через раздельные запросы, учитывая что уже добавили секции:
+
     @Override
     public Resume get(String uuid) {
-        return sqlHelper.execute("" +
-                        "    SELECT * FROM resume r " +
-                        " LEFT JOIN contact c " +
-                        "        ON r.uuid = c.resume_uuid " +
-                        "     WHERE r.uuid =? ",
-                ps -> {
-                    ps.setString(1, uuid);
-                    ResultSet rs = ps.executeQuery();
-                    if (!rs.next()) {
-                        throw new NotExistStorageException(uuid);
-                    }//если в ResultSet чтото есть - соберем объект Resume
-                    Resume r = new Resume(uuid, rs.getString("full_name"));
+        return sqlHelper.transactionalExecute(conn -> {
+            Resume r;
+            try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM resume WHERE uuid =?")) {
+                ps.setString(1, uuid);
+                ResultSet rs = ps.executeQuery();
+                if (!rs.next()) {
+                    throw new NotExistStorageException(uuid);
+                }
+                r = new Resume(uuid, rs.getString("full_name"));
+            }
 
-                    do {
-                        addContact(rs, r);
-                    } while (rs.next());
+            try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM contact WHERE resume_uuid =?")) {
+                ps.setString(1, uuid);
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    addContact(rs, r);
+                }
+            }
 
-//                    ПЕРЕНЕСЛИ ЭТОТ КОД В служебный addContact() - убрали повторяющийся код (цикл do-while оставили)
-//                    do {//и добавим в этот объект Resume  (r.addContact) вытащив контакты из ResultSet
-//                        String value = rs.getString("value");
-//                        ContactType type = ContactType.valueOf(rs.getString("type"));
-//                        r.addContact(type, value);
-//                    } while (rs.next());//делаем до тех пор, пока есть записи в ResultSet
+            try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM section WHERE resume_uuid =?")) {
+                ps.setString(1, uuid);
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    addSection(rs, r);
+                }
+            }
 
-                    return r;
-                });
+            return r;
+        });
     }
+
+    //------------------------------------------------------------------------------------------------------------------
 
     //сначала обновляем full_name по его uuid'у,
     //а при добавлении контактов можно реализовать сложную логику- проверки: а сущ. ли такой контакт,
@@ -129,37 +180,16 @@ public class SqlStorage implements Storage{
                     }
                 }
                 deleteContacts(conn, r);
-                insertContact(conn, r);
+                deleteSections(conn, r);
+                insertContacts(conn, r);
+                insertSections(conn, r);
                 return null;
             }
         });
     }
 
-    //всё содержимое метода перенесли из save.
-    private void insertContact(Connection conn, Resume r) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement("INSERT INTO contact (resume_uuid, type, value) VALUES (?,?,?)")) {
-            for (Map.Entry<ContactType, String> e : r.getContacts().entrySet()) {
-                ps.setString(1, r.getUuid());
-                ps.setString(2, e.getKey().name());
-                ps.setString(3, e.getValue());
-                ps.addBatch();
-            }
-            ps.executeBatch();
-        }
-    }
-
-    //этот метод исп. при update- сначала удаляем контакты (потом записываем вновь пришедшие)
-    private void deleteContacts(Connection conn, Resume r) {
-        sqlHelper.execute("DELETE  FROM contact WHERE resume_uuid=?", new SqlExecutor<Object>() {
-            @Override
-            public Object execute(PreparedStatement ps) throws SQLException {
-                ps.setString(1, r.getUuid());
-                ps.execute();
-                return null;
-            }
-        });
-    }
-
+    //------------------------------------------------------------------------------------------------------------------
+//                                          save():
 //    @Override
 //    public void save(Resume r) {
 //        //если из типизированного метода мы ничего не хотим возратить, воспользуемся <Void>
@@ -207,12 +237,17 @@ public class SqlStorage implements Storage{
                     }
             //на том же conn - делаем запрос для записи в таблицу contact полей: resume_uuid, type, value:
             //перенесли эту часть кода в отдельный метод insertContact
-                   insertContact(conn, r);
+                    insertContacts(conn, r);
+                    insertSections(conn, r);
                     return null;
                 }
         );
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+
+    //тк в таблицах дб с вторичным ключем которые, сделали каскадное удаление(при удалении из таблицы резюме с первичным
+    // ключем) то метод delete не меняем для контактов и секций.
     @Override
     public void delete(String uuid) {
         sqlHelper.execute("DELETE FROM resume WHERE uuid=?", new SqlExecutor<Object>() {
@@ -227,6 +262,19 @@ public class SqlStorage implements Storage{
         });
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public int size() {
+        return sqlHelper.execute("SELECT count(*) FROM resume", st -> {
+            ResultSet rs = st.executeQuery();
+            //next() в классе ResultSet не только проверяет- есть ли еще след. запись (возвр true)
+            //но и передвигает курсор, если такая запись есть:
+            return rs.next() ? rs.getInt(1) : 0;//getInt из ResultSet достанет одно первое число, если оно есть
+        });
+    }
+//----------------------------------------------------------------------------------------------------------------------
+//                                         getAllSorted():
     //ДАЛЕЕ ПЕРЕПИШЕМ, ЧТОБЫ И КОНТАКТЫ ДОСТАВАТЬ. через LEFT JOIN будем это делать
     //можно еще через 2- запроса(получить full_name, потом контакты, потом склеить)
 //    @Override
@@ -245,39 +293,84 @@ public class SqlStorage implements Storage{
 //        });
 //    }
 
+
+    //1 в sqlHelper.execute() отправляем JOIN запрос(склеим 2-е таблицы по uuid)
+    //2 и также отправляем кусок кода в котором ResultSet получает результирующую таблицу,
+    //3 создаем новую служебную мапу, она LinkedHashMap чтобы сохраняла порядок занесения
+    //  тк заносится будет уже отсортированные данные с пом ORDER BY
+    //4 далее в цикле while:
+    //5 переменной String uuid присваиваем значение "uuid" из очередной ячейки из таблицы из ResultSet
+    //6 создаем объект Resume resume пытаясь взять из его из служебной мапы  по String uuid
+    //такого объекта в мапе не будет, соответственно Resume resume = null
+    //7 и далее в предикате if видим, что нет такого резюме (resume == null)
+    //8 и далее собираем объект Resume resume
+    //9 и кладем его в служебную мапу
+    //10 далее не выходя из цикла while вызываем addContact в котром к текущему Resume resume добавляем контакты
+    //11 из куска кода возвращаем новый ArrayList с объектами Resume resume
+//    @Override
+//    public List<Resume> getAllSorted() {
+//        return sqlHelper.execute("" +    //1
+//                "   SELECT * FROM resume r\n" +
+//                "LEFT JOIN contact c ON r.uuid = c.resume_uuid\n" +
+//                "ORDER BY full_name, uuid", ps -> {   //2
+//            ResultSet rs = ps.executeQuery();   //2
+//            Map<String, Resume> map = new LinkedHashMap<>();  //3
+//            while (rs.next()) {  //4
+//                String uuid = rs.getString("uuid");   //5
+//                Resume resume = map.get(uuid);  //6
+//                if (resume == null) { //7
+//                    resume = new Resume(uuid, rs.getString("full_name")); //8
+//                    map.put(uuid, resume);  //9
+//                }
+//                addContact(rs, resume); //11
+//            }
+//            return new ArrayList<>(map.values());
+//        });
+//    }
+
+    // Todo: Сделать реализацию SqlStorage.getAllSorted через 2 отдельных запроса: отдельно резюме и отдельно контакты.
+    //  Добавить в реализацию SqlStorage и в базу секции (кроме OrganizationSection). Для ListSection склеиваем строки через \n.
+    // будем делать на одном коннекте через транзакцию, чтобы оперрация была атомарной
+    //1  в метод sqlHelper.transactionalExecute() отправляем кусок кода
+    //2  создаем новую служебную мапу. LinkedHashMap<>будет сохранять порядок отсортированоого через order by занесения
+    //3  из таблицы резюме берем отсортированный список, результирующую таблицу кладем в ResultSet. в цикле идем
+    //   по ResultSet и кладем в служебную мапу ключ-uuid и значение-new Resume
+    //   [в postgresql закрывать ResultSet в блоке try с ресурсами необязательно]
+    //4  достаем все контакты, проходимся по всем записям, достаем Resume r по значению в ячейке "resume_uuid",
+    //   и добавляем контакт в Resume r в методе addContact()
     @Override
     public List<Resume> getAllSorted() {
-        //1 в sqlHelper.execute() отправляем JOIN запрос(склеим 2-е таблицы по uuid)
-        //2 и также отправляем кусок кода в котором ResultSet получает результирующую таблицу,
-        //3 создаем новую служебную мапу, она LinkedHashMap чтобы сохраняла порядок занесения
-        //  тк заносится будет уже отсортированные данные с пом ORDER BY
-        //4 далее в цикле while:
-        //5 переменной String uuid присваиваем значение "uuid" из очередной ячейки из таблицы из ResultSet
-        //6 создаем объект Resume resume пытаясь взять из его из служебной мапы  по String uuid
-        //такого объекта в мапе не будет, соответственно Resume resume = null
-        //7 и далее в предикате if видим, что нет такого резюме (resume == null)
-        //8 и далее собираем объект Resume resume
-        //9 и кладем его в служебную мапу
-        //10 далее не выходя из цикла while вызываем addContact в котром к текущему Resume resume добавляем контакты
-        //11 из куска кода возвращаем новый ArrayList с объектами Resume resume
-        return sqlHelper.execute("" +    //1
-                "   SELECT * FROM resume r\n" +
-                "LEFT JOIN contact c ON r.uuid = c.resume_uuid\n" +
-                "ORDER BY full_name, uuid", ps -> {   //2
-            ResultSet rs = ps.executeQuery();   //2
-            Map<String, Resume> map = new LinkedHashMap<>();  //3
-            while (rs.next()) {  //4
-                String uuid = rs.getString("uuid");   //5
-                Resume resume = map.get(uuid);  //6
-                if (resume == null) { //7
-                    resume = new Resume(uuid, rs.getString("full_name")); //8
-                    map.put(uuid, resume);  //9
+        return sqlHelper.transactionalExecute(conn -> {//1
+            Map<String, Resume> resumes = new LinkedHashMap<>();//2
+
+            try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM resume ORDER BY full_name, uuid")) {//3
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    String uuid = rs.getString("uuid");
+                    resumes.put(uuid, new Resume(uuid, rs.getString("full_name")));
                 }
-                addContact(rs, resume); //11
             }
-            return new ArrayList<>(map.values());
+
+            try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM contact")) {//4
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    Resume r = resumes.get(rs.getString("resume_uuid"));
+                    addContact(rs, r);
+                }
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM section")) {
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    Resume r = resumes.get(rs.getString("resume_uuid"));
+                    addSection(rs, r);
+                }
+            }
+
+            return new ArrayList<>(resumes.values());
         });
     }
+    //------------------------------------------------------------------------------------------------------------------
 
     //в этот метод, код переехал из get тк этот код повторяется и в getAllSorted
     private void addContact(ResultSet rs, Resume r) throws SQLException {
@@ -287,14 +380,60 @@ public class SqlStorage implements Storage{
         }
     }
 
-    @Override
-    public int size() {
-        return sqlHelper.execute("SELECT count(*) FROM resume", st -> {
-            ResultSet rs = st.executeQuery();
-            //next() в классе ResultSet не только проверяет- есть ли еще след. запись (возвр true)
-            //но и передвигает курсор, если такая запись есть:
-            return rs.next() ? rs.getInt(1) : 0;//getInt из ResultSet достанет одно первое число, если оно есть
-        });
+    //1  читаем из rs "content", который далее перегоним в секции
+    //2  читаем из rs "type" - это енум
+    //3  добавляем к объекту Resume мапу Section, передавая в сеттер-метод r.addSection  ключ-енум type и
+    //   и объект класса Section, который распарсиваем в объект с пом. нашего JsonParser.read из строки в ячейке content в дб
+    private void addSection(ResultSet rs, Resume r) throws SQLException {
+        String content = rs.getString("content");//1
+        if (content != null) {
+            SectionType type = SectionType.valueOf(rs.getString("type"));//2
+            r.addSection(type, JsonParser.read(content, Section.class));//3
+        }
+    }
+
+    private void insertSections(Connection conn, Resume r) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement("INSERT INTO section (resume_uuid, type, content) VALUES (?,?,?)")) {
+            for (Map.Entry<SectionType, Section> e : r.getSections().entrySet()) {
+                ps.setString(1, r.getUuid());
+                ps.setString(2, e.getKey().name());
+                Section section = e.getValue();
+                ps.setString(3, JsonParser.write(section, Section.class));//десериализовываем строку в объект Section
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+    }
+
+    private void deleteSections(Connection conn, Resume r) throws SQLException {
+        deleteAttributes(conn, r, "DELETE  FROM section WHERE resume_uuid=?");
+    }
+
+    //удаляет секции из объкута Резюме
+    //из одноко коннекта постоянно делаем разные препаредСтетемы
+    private void deleteAttributes(Connection conn, Resume r, String sql) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, r.getUuid());
+            ps.execute();
+        }
+    }
+
+    //всё содержимое метода перенесли из save.
+    private void insertContacts(Connection conn, Resume r) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement("INSERT INTO contact (resume_uuid, type, value) VALUES (?,?,?)")) {
+            for (Map.Entry<ContactType, String> e : r.getContacts().entrySet()) {
+                ps.setString(1, r.getUuid());
+                ps.setString(2, e.getKey().name());
+                ps.setString(3, e.getValue());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+    }
+
+    //этот метод исп. при update- сначала удаляем контакты (потом записываем вновь пришедшие)
+    private void deleteContacts(Connection conn, Resume r) throws SQLException {
+        deleteAttributes(conn, r, "DELETE  FROM contact WHERE resume_uuid=?");
     }
 }
     /** ЭТО НАЧАЛЬНАЯ РЕАЛИЗАЦИЯ SqlStorage. ДАЛЕЕ ВЫНЕСЛИ ПОВТОРЯЮЩИЙСЯ КОД В УТИЛЬНЫЕ МЕТОДЫ

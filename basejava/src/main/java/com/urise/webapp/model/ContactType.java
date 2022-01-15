@@ -6,12 +6,44 @@ public enum ContactType {
     PHONE("Тел."),
     MOBILE("Мобильный"),
     HOME_PHONE("Домашний тел."),
-    SKYPE("Skype"),
-    MAIL("Почта"),
-    LINKEDIN("Профиль LinkedIn"),
-    GITHUB("Профиль GitHub"),
-    STACKOVERFLOW("Профиль Steckoverflow"),
-    HOME_PAGE("");
+
+    //тк енумы это инстансы этого класса и у них могут быть члены класса, методы. и общий метод toHtml0 мы можем в каждом инстансе переопределить
+    SKYPE("Skype") {
+        @Override
+        public String toHtml0(String value) {
+            return getTitle() + ": " + toLink("skype:" + value, value);//отображение контакта SKYPE в виде ссылки skype
+        }
+    },
+    MAIL("Почта") {
+        @Override
+        public String toHtml0(String value) {
+            return getTitle() + ": " + toLink("mailto:" + value, value);//отображение контакта MAIL в виде ссылки mailto
+        }
+    },
+    LINKEDIN("Профиль LinkedIn") {
+        @Override
+        public String toHtml0(String value) {
+            return toLink(value);
+        }
+    },
+    GITHUB("Профиль GitHub") {
+        @Override
+        public String toHtml0(String value) {
+            return toLink(value);
+        }
+    },
+    STATCKOVERFLOW("Профиль Stackoverflow") {
+        @Override
+        public String toHtml0(String value) {
+            return toLink(value);
+        }
+    },
+    HOME_PAGE("Домашняя страница") {
+        @Override
+        public String toHtml0(String value) {
+            return toLink(value);
+        }
+    };
 
     private final String title;
 
@@ -21,5 +53,22 @@ public enum ContactType {
 
     public String getTitle() {
         return title;
+    }
+
+    protected String toHtml0(String value) {
+        return title + ": " + value;
+    }
+
+    //метод для красивого отображения контактов в виде view.jsp. выше переопределяем toHtml0() для каждого контакта-енума
+    public String toHtml(String value) {
+        return (value == null) ? "" : toHtml0(value);// в toHtml0 попадают уже не нулевые значения
+    }//если value == null, то маскируем ""
+
+    public String toLink(String href) {
+        return toLink(href, title);
+    }
+
+    public static String toLink(String href, String title) {
+        return "<a href='" + href + "'>" + title + "</a>";
     }
 }

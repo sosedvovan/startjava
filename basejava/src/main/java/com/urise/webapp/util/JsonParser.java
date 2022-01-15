@@ -18,7 +18,7 @@ public class JsonParser {
 
 
     public static <T> T read(Reader reader, Class<T> clazz) {//принимаем символьный Reader из текстового файла и Resume.class, объекты которого десеризует
-        return GSON.fromJson(reader, clazz);
+        return GSON.fromJson(reader, clazz); //возвращаем объект <T>
     }
 
     //сериализуем с учетом адаптера, кот объявлен в переменной GSON:
@@ -26,4 +26,16 @@ public class JsonParser {
         GSON.toJson(object, writer);
     }
 
+    //метод для sqlStorage. GSON.fromJson() - метод гуглДжейсона- читает из строки, преобразует в объект заданного класса
+    public static <T> T read(String content, Class<T> clazz) {
+        return GSON.fromJson(content, clazz);//возвращаем объект <T>
+    }
+
+    public static <T> String write(T object) {
+        return GSON.toJson(object);
+    }
+
+    public static <T> String write(T object, Class<T> clazz) {
+        return GSON.toJson(object, clazz);//есть метод у Json- вместе с классом
+    }
 }

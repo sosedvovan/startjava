@@ -20,8 +20,20 @@ import java.util.Properties;
 */
 
 public class Config {
-    //константа с расположением файла с паролями
-    private static final File PROPS = new File("basejava\\config\\resumes.properties");
+
+    //константа с расположением файла с паролями. но в таком виде Томкат ее не увидит тк у него свой корневой каталог
+    //можно сделать чз переменные среды, можно сделать фиксированное место в файловой системе-тильда в home или от рута,
+    //можно в дб конфигурить, те по разному. мы передадим в качестве параметра: в Run->Edit Configuration->VM options:
+    //-DhomeDir="C:/Users/Vladimir/IdeaProjects/startjava" зададим домашний каталог(исп. двойные слеши или юниксовые)
+    //те при запусе Томката мы передадим ему переменную окружения homeDir, а в коде Ява(в этом классе)
+    //возьмем  homeDir как системПроперти. для этого создадим статический метод getHomeDir() в котором скажем,
+    //что если есть переменная homeDir, то возвращаем ее, если ее нет, то возвращаем текущий каталог.
+    //тестам тоже понадобится это переменная homeDir.
+    //private static final File PROPS = new File("basejava\\config\\resumes.properties");
+    private static final File PROPS = new File(getHomeDir(), "basejava\\config\\resumes.properties");
+
+
+
     //объект этого класса-синглетон(тк однопоточка у нас)
     private static final Config INSTANCE = new Config();//вызываем пустой конструктор, но с кодом в теле
     //и получаем объект этого класса INSTANCE кот несет в себе поля с данными из файла с паролями
@@ -68,4 +80,14 @@ public class Config {
     public Storage getStorage() {
         return storage;
     }
+
+    private static File getHomeDir() {
+        String prop = System.getProperty("homeDir");
+        File homeDir = new File(prop == null ? "." : prop);//"."-текущий каталог
+        if (!homeDir.isDirectory()) {//если homeDir не папка, то ексепшен
+            throw new IllegalStateException(homeDir + " is not directory");
+        }
+        return homeDir;
+    }
+
 }
