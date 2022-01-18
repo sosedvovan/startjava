@@ -14,11 +14,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.time.Month;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 public abstract class AbstractStorageTest {
     /**
@@ -193,9 +191,9 @@ public abstract class AbstractStorageTest {
     @Test
     public void update() throws Exception{//тест метода update
         Resume newResume = new Resume(UUID_1, "New Name");//создали совершенно новый объект Resume
-        R1.addContact(ContactType.MAIL, "mail1@google.com");//пытаемся еще и контакты обновить
-        R1.addContact(ContactType.SKYPE, "NewSkype");
-        R1.addContact(ContactType.MOBILE, "+7 921 222-22-22");
+        R1.setContact(ContactType.MAIL, "mail1@google.com");//пытаемся еще и контакты обновить
+        R1.setContact(ContactType.SKYPE, "NewSkype");
+        R1.setContact(ContactType.MOBILE, "+7 921 222-22-22");
         storage.update(newResume);//действие - записали этот объект поверх старого в хранилище storage
         assertTrue(newResume.equals(storage.get(UUID_1)));//запросили из хранилища этот объект Resume по
         // значению его поля и сравнили с ожидаемым-кот только что создали

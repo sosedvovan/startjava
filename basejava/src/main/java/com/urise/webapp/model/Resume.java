@@ -48,6 +48,19 @@ public class Resume implements Comparable<Resume>, Serializable {
     //так же скопируем ее в организайшен и все 3-и секции- в классы, от которых зависит этот класс
     //(в родителя секций-Секшен не надо: это по наследству не работает)
 
+
+    //пустое резюме(пустые секции, организации и периуды внутри организаций) для создания нового резюме в сервлете:
+    public static final Resume EMPTY = new Resume();
+
+    static {
+        EMPTY.setSection(SectionType.OBJECTIVE, TextSection.EMPTY);
+        EMPTY.setSection(SectionType.PERSONAL, TextSection.EMPTY);
+        EMPTY.setSection(SectionType.ACHIEVEMENT, ListSection.EMPTY);
+        EMPTY.setSection(SectionType.QUALIFICATIONS, ListSection.EMPTY);
+        EMPTY.setSection(SectionType.EXPERIENCE, new OrganizationSection(Organization.EMPTY));
+        EMPTY.setSection(SectionType.EDUCATION, new OrganizationSection(Organization.EMPTY));
+    }
+
     //Unique identifier
     private  String uuid;
     /**
@@ -126,25 +139,25 @@ public class Resume implements Comparable<Resume>, Serializable {
         return uuid;
     }
 
-    //геттер для поля- подаем ключ мапы берем значение
+    //геттер для поля- подаем ключ мапы(енум) берем значение (в контактах значение по ключу- это String'а)
     public String getContact(ContactType type){
-        return contacts.get(type);
+        return contacts.get(type);//метод get() возвращает значение(стрингу в этом случае) по ключу(енум из ContactType)
     }
 
-    //геттер для поля- подаем ключ мапы берем значение
+    //геттер для поля- подаем ключ мапы(енум) берем значение- (в секциях значение по ключу- это будет объект TextSection или  ListSection или OrganizationSection)
     public Section getSection(SectionType type){
-        return sections.get(type);
+        return sections.get(type);//метод get() возвращает значение (TextSection или  ListSection или OrganizationSection) по ключу(енум из SectionType)
     }
 
     //-------------------------------------------------------------------------------------------------------
-    //                   МЕТОДЫ- ТИПА СЕТТЕРЫ ДЛЯ ПОЛЕЙ МАП
+    //  МЕТОДЫ- ТИПА СЕТТЕРЫ ДЛЯ ПОЛЕЙ МАП (приставку add заменили на set тк в сервлете будем не добавлять, а замещать)
 
-    public void addContact(ContactType type, String value) {
+    public void setContact(ContactType type, String value) {
         contacts.put(type, value);
     }
 
 
-    public void addSection(SectionType type, Section section) {
+    public void setSection(SectionType type, Section section) {
         sections.put(type, section);
     }
 

@@ -157,14 +157,14 @@ public class DataStreamSerializer implements StreamSerializer {
              * //resume.addContact(contactType, value); //строка работает в doRead()-от туда мы этот код и перенесли
              */
             //в итоге- чтение контактов- это одна след. строчка
-            readItems(dis, () -> resume.addContact(ContactType.valueOf(dis.readUTF()), dis.readUTF()));
+            readItems(dis, () -> resume.setContact(ContactType.valueOf(dis.readUTF()), dis.readUTF()));
 
             //Todo реализовать чтение sections
             readItems(dis, () -> {
                 //сначала прочтем sectionType (valueOf строку переведет в енум)
                 SectionType sectionType = SectionType.valueOf(dis.readUTF());
                 //потом в зависимости от вида секции(енума)- читаем эту секцию в методе readSection и собираем Мапу
-                resume.addSection(sectionType, readSection(dis, sectionType));
+                resume.setSection(sectionType, readSection(dis, sectionType));
             });
             return resume;
         }

@@ -44,7 +44,7 @@ h2, h3 {
 li {
     margin: 15px 0;
 }
-/*
+
 a[href^="skype:"] {
     padding-left: 20px !important;
     background: url(../../../img/skype.png) no-repeat center left;
@@ -69,4 +69,4 @@ a[href*="github."] {
     padding-left: 20px !important;
     background: url(../../../img/gh.png) no-repeat center left;
 }
-*/
+

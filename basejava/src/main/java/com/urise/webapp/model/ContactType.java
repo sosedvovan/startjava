@@ -47,22 +47,23 @@ public enum ContactType {
 
     private final String title;
 
+    //конструктор
     ContactType(String title) {
         this.title = title;
     }
-
+    //геттер
     public String getTitle() {
         return title;
     }
 
     protected String toHtml0(String value) {
-        return title + ": " + value;
+        return title + ": " + value;//тело этого метода переопределенно для всех енумов кроме первых трех
     }
 
     //метод для красивого отображения контактов в виде view.jsp. выше переопределяем toHtml0() для каждого контакта-енума
-    public String toHtml(String value) {
+    public String toHtml(String value) {//String value это уже конкретное значение придет- напр для енума MAIL придет стринга: "mail1@google.com"
         return (value == null) ? "" : toHtml0(value);// в toHtml0 попадают уже не нулевые значения
-    }//если value == null, то маскируем ""
+    }//если value == null, то маскируем этот null с помощью пустой строки: ""
 
     public String toLink(String href) {
         return toLink(href, title);

@@ -21,6 +21,10 @@ import static com.urise.webapp.util.DateUtil.of;
 //@XmlAccessorType(XmlAccessType.FIELD)//через родителя наследует
 public class Organization implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    //создадим пустой объект (паттерн спешал-кейс) для отображения в edit.jsp:
+    public static final Organization EMPTY = new Organization("", "", Position.EMPTY);
+
     //в модели организация представляет собой хоум-линк(объект класса Link в поле имеет ссылку)
     // и список позиций (список объектов класса Position(внутренний в этом) в полях даты с титрами)
     private  Link homePage;
@@ -87,6 +91,8 @@ public class Organization implements Serializable {
     static- тк ему не нужны методы и члены внешнего класса, те не нужна внутренняя ссылка*/
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class Position implements Serializable{
+
+        public static final Position EMPTY = new Position();
 
         @XmlJavaTypeAdapter(LocalDateAdapter.class)
         private  LocalDate startDate;
