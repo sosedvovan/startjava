@@ -1,0 +1,88 @@
+результат зали на:   https://resumesvladimir.herokuapp.com/        https://test-appvladibir.herokuapp.com/
+drugst.....ru
+Q12w821Q12w821_1978821
+
+https://devcenter.heroku.com/articles/war-deployment#deployment-with-the-heroku-cli
+сначала с сайта heroku скачал прогу для явы и для виндоус 64.   https://devcenter.heroku.com/articles/getting-started-with-java#set-up      Getting Started on Heroku with Java
+создал приложение в heroku назвав его resumesvladimir и выбрал европу  https://dashboard.heroku.com/apps
+создал ДБ в heroku   https://data.heroku.com/
+потом залогинился. ввел в консоле, открытой в корневой папке проекта ---heroku login--- залогинился чз открытие странички в браузере
+потом ввел в этой же консоли команду для инсталяции плагина ---heroku plugins:install heroku-cli-deploy--- плагин установился
+потом на сайте heroku скопировал креденшиналы в этот текстовый файл. см. ниже
+в идее создал подключение к дб, созданной в heroku, используя креденшеналы. URL там как то сам установился, не из креденшаналов. сделал тест коннект.
+ssl не настраивал(а в учебном уроке № 43 настраивает автор)
+для доступа к удаленной БД используйте следующие настройки SSL
+ssl=true&sslmode=verify-ca&sslfactory=org.postgresql.ssl.NonValidatingFactory
+из идеи выполнил sql код для создания таблиц в дб и популяризировал(заполнил одну таблицу)
+отредактировал resume.properties и класс Config под хироковскую дб.
+папку с resume.properties пометил как ресурсРут, но она все равно не попала в варник при билде(добавил файлы вручную, открыв варник в винраре)
+сделал билд варника
+открыл еще одну консоль в папке с варником(out\artifacts\resume)
+и в ней дал команду на загрузку варника на хероку:
+heroku war:deploy <path_to_war_file--app <app_name>    --- не эту, это шаблон для 8-й Явы
+heroku war:deploy <path_to_war_file> --jdk 11 --app <app_name>   --- а в этот шаблон
+-----heroku war:deploy resume.war --jdk 11 --app resumesvladimir-----    ----- подставил свои данные
+
+
+
+https://dashboard.heroku.com/apps/resumesvladimir/deploy/heroku-git
+
+PS C:\Users\Vladimir\IdeaProjects\startjava> heroku login
+ »   Warning: Our terms of service have changed: https://dashboard.heroku.com/terms-of-service
+heroku: Press any key to open up the browser to login or q to exit:
+Opening browser to https://cli-auth.heroku.com/auth/cli/browser/a0993543-913c-41a7-9e5a-c57116b7945f?requestor=SFMyNTY.g2gDbQAAAA0xMDkuMjUyLjEzLjgxbgYAeDPkbX4BYgABUYA.pYpLDQxWSzi1LxHBAR6u0lQx75_QTH1jkqG0FKyArgk
+Logging in... done
+Logged in as drugst@yandex.ru
+PS C:\Users\Vladimir\IdeaProjects\startjava>
+
+heroku addons
+heroku pg
+heroku config
+heroku pg:psql
+heroku run echo \$JDBC_DATABASE_URL
+
+Host
+ec2-99-80-108-106.eu-west-1.compute.amazonaws.com
+Database
+da4rqhh5135qq5
+User
+baxqyxgrtkzoch
+Port
+5432
+Password
+44ed90adfd6ff3099bd5ccf4a189b01a808fb7285fe85bfc56c7bc27127b7f6b
+
+URI с такой строкой не сработало
+postgres://baxqyxgrtkzoch:44ed90adfd6ff3099bd5ccf4a189b01a808fb7285fe85bfc56c7bc27127b7f6b@ec2-99-80-108-106.eu-west-1.compute.amazonaws.com:5432/da4rqhh5135qq5
+
+это было в строке URI раньше и с этим и произошло подключение:
+jdbc:postgresql://ec2-99-80-108-106.eu-west-1.compute.amazonaws.com:5432/da4rqhh5135qq5
+
+
+Heroku CLI
+heroku pg:psql postgresql-octagonal-80468 --app resumesvladimir
+
+
+посмотреть креденшаналы
+https://data.heroku.com/datastores/5eaabd94-b768-400b-9b28-e15b0f4481ed#administration
+на 16.02.2022:
+Host
+    ec2-99-81-177-233.eu-west-1.compute.amazonaws.com
+Database
+    dd0nqvh9n7avtv
+User
+    nehkzpeulruhek
+Port
+    5432
+Password
+    21d34b4ab6f376faf2e5b26956ccf1ac5e96cb23f7e60aeecf1e38d7c3c04def
+
+URI:
+                               postgres://nehkzpeulruhek:21d34b4ab6f376faf2e5b26956ccf1ac5e96cb23f7e60aeecf1e38d7c3c04def@ec2-99-81-177-233.eu-west-1.compute.amazonaws.com:5432/dd0nqvh9n7avtv
+url можно сделать из URI: jdbc:postgresql://ec2-99-81-177-233.eu-west-1.compute.amazonaws.com:5432/dd0nqvh9n7avtv
+Heroku CLI
+    heroku pg:psql postgresql-octagonal-80468 --app resumesvladimir
+
+мануал по хероко:
+https://translated.turbopages.org/proxy_u/en-ru.ru.f15e7be1-620d211f-a20f98bd-74722d776562/https/github.com/dwyl/learn-heroku/blob/master/README.md
+
