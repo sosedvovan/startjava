@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+//параметризуем тип ключа-поиска(SearchKey) для разных реализаций хранилищ.
 
 //Object заменили на <SK>-дженерик- компилятор теперь сам проверяет типы
 // следовательно в наследниках этого класса надо добавить <...>:
@@ -43,7 +44,7 @@ public abstract class AbstractStorage<SK> implements Storage {//<SK> это sear
     private static final Logger LOG = Logger.getLogger(AbstractStorage.class.getName());
 
     //-------------------------------------------------------------------------
-    //БЛОК АБСТРАКТНЫХ МЕТОДОВ (перененный вверх):
+    //БЛОК АБСТРАКТНЫХ МЕТОДОВ:
 
     //метод getSearchKey() абстрактный вернет объект по значению его поля
     protected abstract SK getSearchKey(String uuid);

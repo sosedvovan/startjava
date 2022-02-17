@@ -16,11 +16,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PathStorage extends AbstractStorage<Path> {
     //помним, что Path это усовершенствованный File
+    //это сторадж для сохранения объектов в файл, соотв реализуем в нем все методы интерфейса
     private Path directory;
 
     private StreamSerializer streamSerializer;
@@ -37,7 +39,7 @@ public class PathStorage extends AbstractStorage<Path> {
 
     @Override
     public void clear() {
-        getFilesList().forEach(this::doDelete);
+        getFilesList().forEach(path -> PathStorage.this.doDelete(path));
     }
 
     @Override
@@ -106,6 +108,7 @@ public class PathStorage extends AbstractStorage<Path> {
     }
 
     //над списком файлов оборачиваем ленивую оберточку Stream:
+    //породим стрим из файлов, кот лежат в directory(в этой папке) с пом метода list() из утильного класса Files
     private Stream<Path> getFilesList() {//ексепшены не пробрасывает а сразу обрабатывает
         try {
             return Files.list(directory);

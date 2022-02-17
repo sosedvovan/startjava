@@ -268,7 +268,7 @@ public abstract class AbstractStorageTest {
     }
 
     @Test(expected = ExistStorageException.class)
-    public void saveNotExist() throws Exception{ //проверка нашего второго собственого ексепшена при попытке сохранить
+    public void saveExist() throws Exception{ //проверка нашего второго собственого ексепшена при попытке сохранить
         storage.save(R1);//пробуем сохранить объект который уже есть в массиве
     }
 

@@ -139,7 +139,7 @@ public class Resume implements Comparable<Resume>, Serializable {
         return uuid;
     }
 
-    //геттер для поля- подаем ключ мапы(енум) берем значение (в контактах значение по ключу- это String'а)
+    //геттер для поля- подаем ключ мапы(енум) берем значение из мапы contacts (в контактах значение по ключу- это String'а)
     public String getContact(ContactType type){
         return contacts.get(type);//метод get() возвращает значение(стрингу в этом случае) по ключу(енум из ContactType)
     }

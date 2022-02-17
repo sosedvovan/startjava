@@ -14,7 +14,7 @@ public class ListSection extends Section{
     /**при создании объекта в первый конструктор передаем элементы списка-варарги: напр: (new ListSection("F", "G", "M","L").
     в этом конструкторе эти элементы кладутся в список
     и передаются this() в главный конструктор*/
-    //Arrays.asList() обычный массив преобразует в список List. Иногда в ArrayList???
+    //принимает последовательность стринг(варарги) а Arrays.asList() обычный массив преобразует  в список List . Иногда в ArrayList???
     public ListSection(String ... items){
         this(Arrays.asList(items));
     }
@@ -50,8 +50,7 @@ public class ListSection extends Section{
 
     @Override
     public String toString() {
-        return "ListSection{" +
-                "items=" + items +
-                '}';
+        return ""
+                + items;
     }
 }

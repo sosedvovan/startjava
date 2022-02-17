@@ -39,7 +39,8 @@ public class ResumeServlet extends HttpServlet {
         storage = Config.get().getStorage();
     }
 
-    //этот метод принимает все Post запросы
+    //этот метод принимает все Post запросы из edit.jsp и здесь надо из данных пришедших из формы
+    //создать новое резюме или обновить уже существующее
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         //говорим, что request принимает русские буквы (имя пишем по русски)
@@ -48,14 +49,19 @@ public class ResumeServlet extends HttpServlet {
         String uuid = request.getParameter("uuid");
         String fullName = request.getParameter("fullName");
 
+        //теперь определяем: что мы делали перед вызовом edit.jsp в listJstl.jsp - нажимали на кнопку создать или на кнопку редактировать
+        //флаг isCreate будет true, если uuid не существует, значит надо сохранять(save), а не редактировать(update)
         final boolean isCreate = (uuid == null || uuid.length() == 0);
         Resume r;
-        if (isCreate) {
+        if (isCreate) {//true- создаем объект Resume для save
             r = new Resume(fullName);
         } else {
-            r = storage.get(uuid);
+            r = storage.get(uuid);//достаем уже существующий объект Resume из базы для update
             r.setFullName(fullName);
         }
+
+        //то на данном этапе имеем объект Resume внутри которого только fullName
+
         //ДЕЛАЕМ ОБРАБОТКУ КОНТАКТОВ (из формы из edit.jsp)
         //по uuid возьмем резюме:
         //при добавлении нового резюме(пост запрос) здесь можно сделать проверку uuid- если оно существует-загружаем по
@@ -63,33 +69,48 @@ public class ResumeServlet extends HttpServlet {
 //        Resume r = storage.get(uuid);
         //в этом резюме поменяем значение поля fullName на новое, пришедшее в пост запросе
 //        r.setFullName(fullName);
-        //так же поменяем контактную группу:
-        for (ContactType type : ContactType.values()) {//итерируемся по Контактам-енумам
-            String value = request.getParameter(type.name());//name() в Енуме возвращает имя его Константы. Берем у request значение по ключу-енуму.
+
+        //так же поменяем контактную группу (в цикле по заданному в форме ключу(name-в форме)-это название енума, получаем(request.getParameter()) значение(value в форме) - это текст, кот внесли в поле ):
+        for (ContactType type : ContactType.values()) {//итерируемся по Контактам-енумам (values() походу возвратит массив со всеми Енумами)
+            //name() в Енуме возвращает имя его Константы - оно(имя) и есть ключ для параметра(значения) в теле запроса из формы.  И берем у request значение по ключу-енуму.
+            //те request.getParameter(берет параметр)(type.name()-по ключу EXPERIENCE(напр))
+            //то в переменной String value будет лежать текст, который мы ввели в форме напротив соотв. енума.
+            String value = request.getParameter(type.name());//getParameter() берет значение(value) по поданному в аргменты ключу(name) из тела пришедшего сюда Post-запроса
             if (value != null && value.trim().length() != 0) {//если значение по текущему в цикле ключу-енуму не null и не пробелы
-                r.setContact(type, value);//если есть значение- добавляем
+                r.setContact(type, value);//если есть значение- добавляем в мапу Контакты эту пару- ЕНУМ-ТЕКСТ ПОЛЯ
             } else {
                 r.getContacts().remove(type);//если значение было, но мы его удалили при edit, то удаляем
             }
-        }
+        }//выходим из for для Contact
 
-        //ДЕЛАЕМ ОБРАБОТКУ КОНТАКТОВ (из формы из edit.jsp)
-        //идем по SectionType, те по енумам:
+        /*
+        getParameter(String param): возвращает значение определенного параметра, название которого передается в метод.
+        Если указанного параметра в запросе нет, то возвращается значение null.
+        getParameterValues(String param): возвращает массив значений, который представляет определенный параметр.
+        Если указанного параметра в запросе нет, то возвращается значение null.
+
+        те здесь слово параметр эквивалентно слову ключ
+         */
+
+        //ДЕЛАЕМ ОБРАБОТКУ СЕКЦИЙ (из формы из edit.jsp)
+        //идем по SectionType, те по енумам (values() походу возвратит массив со всеми Енумами):
         for (SectionType type : SectionType.values()) {
-            //берем параметр name из тела пришедшего пост-запроса:
+            //берем значение(value-в форме) по ключу(name-в форме), этим значением будет стринга с текстом, который мы ввели в форме:
             String value = request.getParameter(type.name());
-            //берем в массив все пришедшие ключи-енумы-name- это названия организаций???:
-            String[] values = request.getParameterValues(type.name());
-            //далее условие, по которому определяем что пришла пустая секция:
-            if (HtmlUtil.isEmpty(value) && values.length < 2) {//метод isEmpty сами писали, но обычно пользуются итьльными классами из библиотеки(спринг, апаче команс, гуава)
-                //удаляем пустую секцию:
+            //так же берем в массив все пришедшие стринги по одному ключу - это мы в поле несколько строк написали, разделяя их переносом строки \n:
+            String[] values = request.getParameterValues(type.name());//для 2-х последних Енумов EDUCATION и EXPERIENCE. из post возьмет список всех Organization
+                                                                     //напр по ключу EXPERIENCE в post запросе получим массив String[] values = ["", "Organization2"]
+
+            //далее условие, если пришла пустая секция(String value = null, и в массиве только один элемент- это стринга с ""):
+            if (HtmlUtil.isEmpty(value) && values.length < 2) {//метод isEmpty сами писали, но обычно пользуются утильными классами из библиотеки(спринг, апаче команс, гуава)
+                //удаляем пустую секцию:      а length < 2 тк первая там будет - которая пустая ""
                 r.getSections().remove(type);
                 //если секция не пустая-проваливаемся в switch (type):
             } else {
                 switch (type) {
                     case OBJECTIVE:
                     case PERSONAL:
-                        //добавляем в объект Резюме
+                        //добавляем в объект Резюме, в его мапу Секции
                         r.setSection(type, new TextSection(value));
                         break;
                     case ACHIEVEMENT:
@@ -99,34 +120,38 @@ public class ResumeServlet extends HttpServlet {
                         break;
                     case EDUCATION:
                     case EXPERIENCE:
-                        //зададим список организаций, которые у нас есть. те будем в этот List добавлять организации в ходе выполнения кода ниже
-                        // их имена лежат в массиве String[] values???
+                        //будем в этот List добавлять организации в ходе выполнения кода ниже
                         List<Organization> orgs = new ArrayList<>();
-                        //в массив так же берем списки URL:
+                        //в этот массив спарсим из json списки URL:    напр по ключу EXPERIENCEurl получим массив String[] urls = ["", "http://Organization2.ru"]
                         String[] urls = request.getParameterValues(type.name() + "url");
                         //и далее идем по списку всех организаций(values - это имена организаций)
                         for (int i = 0; i < values.length; i++) {
-                            //присваиваем в String name имя очередной в цикле организации
+                            //присваиваем в String name имя очередной в цикле организации для проверки на "пустое" и создания объекта new Link(name, urls[i]) в дальнейшем
                             String name = values[i];
-                            //проверяем что имя организации не пустое (если пустое тогда просто пропускаем ее обработку):
+                            //если имя организации не пустое тогда обрабатываем (если пустое тогда просто пропускаем ее обработку):
                             if (!HtmlUtil.isEmpty(name)) {
-                                //имеется список позиций в текущей (в цикле) организации:
+                                //создаем лист для списка позиций в текущей (в цикле) организации:
                                 List<Organization.Position> positions = new ArrayList<>();
-                                //префикс-счетчик для позиций. в edit.jsp это ${counter.index}
-                                String pfx = type.name() + i;
-                                //далее берем список всех startDates endDates дескрипшинов
-                                String[] startDates = request.getParameterValues(pfx + "startDate");
+                                //префикс-счетчик для позиций. в edit.jsp это ${counter.index}. то создаем стрингу с порядковой цифрой в конце
+                                String pfx = type.name() + i;  //напр EXPERIENCE0 - это префикс для первой организации в массиве values[i=0]
+                                                                //а, напр EXPERIENCE1 - это для второй организации в массиве values[i=1] при второй итерации for
+
+                                //далее берем в массив, из post по ключу EXPERIENCE[i]startDate, список всех startDates от одной организации(текущей в for)
+                                String[] startDates = request.getParameterValues(pfx + "startDate");//напр по ключу EXPERIENCE1startDate получим массив ["", "01/2015"]
+                                //и берем в массив, из post по ключу EXPERIENCE[i]endDate, список всех endDate от одной организации(текущей в for)
                                 String[] endDates = request.getParameterValues(pfx + "endDate");
+                                //и берем в массив, из post по ключу EXPERIENCE[i]title, список всех title от одной организации(текущей в for)
                                 String[] titles = request.getParameterValues(pfx + "title");
+                                //и берем в массив, из post по ключу EXPERIENCE[i]description, список всех description от одной организации(текущей в for)
                                 String[] descriptions = request.getParameterValues(pfx + "description");
-                                //далее цикл по заголовкам titles
+                                //далее цикл по заголовкам titles(это название позиции(должности). если нет названия, то считаем что и startDate,endDate,description тоже нет в post)
                                 for (int j = 0; j < titles.length; j++) {
                                     if (!HtmlUtil.isEmpty(titles[j])) {//если заголовок titles пустой, то считаем, что позиции нет и не обрабатываем
-                                        //если не пустой, то парсим и создаем позиции:
+                                        //если не пустой(, то спарсиваем даты,) создаем объекты позиции от текущей организации и кладем их в List<Organization.Position> positions:
                                         positions.add(new Organization.Position(DateUtil.parse(startDates[j]), DateUtil.parse(endDates[j]), titles[j], descriptions[j]));
                                     }
                                 }
-                                //добавляем организацию в спец созданный для этого выше List<Organization> orgs
+                                //далее создаем объект текущей, во внешнем for, организации и добавляем ее в спец созданный для этого выше List<Organization> orgs
                                 orgs.add(new Organization(new Link(name, urls[i]), positions));
                             }
                         }
@@ -135,7 +160,9 @@ public class ResumeServlet extends HttpServlet {
                         break;
                 }
             }
-        }
+        }//выходим из for, который для Section
+
+        //определяем: что мы делали перед вызовом edit.jsp в listJstl.jsp - нажимали на кнопку создать или на кнопку редактировать
         if (isCreate) {
             storage.save(r);
         } else {

@@ -11,4 +11,5 @@
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <header><a href="resume">Управление резюме</a></header>
+<%--<header><a href="resume?uuid=cbcabe42-9ce9-43ad-b5d6-78c27807ac0e&action=edit">тренировачная</a></header>--%>
 <hr/>

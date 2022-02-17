@@ -34,7 +34,7 @@ public class XmlStreamSerializer implements StreamSerializer {
     public void doWrite(Resume r, OutputStream os) throws IOException {
         //делаем объект врайтера с кодировочкой UTF_8(с Ява7)
         try (Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
-            //и отдаем парсеру на маршарилазию
+            //и отдаем парсеру на маршаризацию
             xmlParser.marshall(r, w);
         }
     }

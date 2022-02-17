@@ -89,20 +89,18 @@ public class DataStreamSerializer implements StreamSerializer {
                         //секшин преобраз в органайзерсекшен и опять пользуемся нашим служебным методом:
                         //и передаем в него поток dos(для вызова writeUTF), коллекцию List<Organization>,
                         //и реализацию ElementWriter<Organization> для Organization с пом анонимного класса
-                        writeCollection(dos, ((OrganizationSection) section).getOrganizations(), new ElementWriter<Organization>() {
-                            @Override//переопределяем абстракт функц. интерфейса след. образом:
-                            public void write(Organization org) throws IOException {
-                                //записываем в файл линк:
-                                dos.writeUTF(org.getHomePage().getName());
-                                dos.writeUTF(org.getHomePage().getUrl());
-                                //изнутри анонима обращаемся к методам через имя этого класса:
-                                DataStreamSerializer.this.writeCollection(dos, org.getPositions(), position -> {
-                                    DataStreamSerializer.this.writeLocalDate(dos, position.getStartDate());
-                                    DataStreamSerializer.this.writeLocalDate(dos, position.getEndDate());
-                                    dos.writeUTF(position.getTitle());
-                                    dos.writeUTF(position.getDescription());
-                                });
-                            }
+                        //переопределяем абстракт функц. интерфейса след. образом:
+                        writeCollection(dos, ((OrganizationSection) section).getOrganizations(), org -> {
+                            //записываем в файл линк:
+                            dos.writeUTF(org.getHomePage().getName());
+                            dos.writeUTF(org.getHomePage().getUrl());
+                            //изнутри анонима обращаемся к методам через имя этого класса:
+                            DataStreamSerializer.this.writeCollection(dos, org.getPositions(), position -> {
+                                DataStreamSerializer.this.writeLocalDate(dos, position.getStartDate());
+                                DataStreamSerializer.this.writeLocalDate(dos, position.getEndDate());
+                                dos.writeUTF(position.getTitle());
+                                dos.writeUTF(position.getDescription());
+                            });
                         });
                         break;
                 }
@@ -143,7 +141,7 @@ public class DataStreamSerializer implements StreamSerializer {
             //делаем это в служ методе readItems(), в аргументы которого отправляем dis и
             //реализацию абстракта interface ElementProcessor - void process()
             //[interface ElementProcessor наш,- типа консаммер, только throws IOException]
-            //в readItems() простем число-маркер с кол-вом строк с контактами
+            //в readItems() прочтем число-маркер с кол-вом строк с контактами
             //и запусти абстракт processor.process();
 
             //получим название контакт-енума:
@@ -184,12 +182,9 @@ public class DataStreamSerializer implements StreamSerializer {
             case QUALIFICATIONS:
                 //для ListSection: читаем из своего метода чтения листа поставляя туда поток и реализацию
                 //и получая оттуда готовый Лист
-                return new ListSection(readList(dis, new ElementReader<String>() {//ElementReader<String> чем параметризуем, то и возвращает
-                    @Override//такая реализация возвращает стрингу:
-                    public String read() throws IOException {
-                        return dis.readUTF();
-                    }
-                }));
+                //ElementReader<String> чем параметризуем, то и возвращает
+//такая реализация возвращает стрингу:
+                return new ListSection(readList(dis, () -> dis.readUTF()));
             //если енум-SectionType EXPERIENCE или EDUCATION, то надо воссоздать OrganizationSection в котором List<Organization> в которых-
             // объект Линк и АррайЛист с объектами Позиция(дата,време,2-е стринги)
             case EXPERIENCE:

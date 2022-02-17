@@ -6,7 +6,7 @@
 и зарегистрировать (привязать) локальный репозиторий к облачному github командой  
 ---  git remote add origin https://github.com/sosedvovan/startjava.git---
 причем url(это путь к репозиторию на облаке который): --origin https://github.com/sosedvovan/startjava.git --
- мы взяли со страници создания репозитория: --https://github.com/sosedvovan/startjava --
+ мы взяли со страницы создания репозитория: --https://github.com/sosedvovan/startjava --
 причем origin- это псевдоним url-а (будем его использовать для команды отправки в облако (запушить))  
 чтобы когда пушить длинный url не писать(можно произвольно но обычно пишут origin)
 ----git remote -v ---- команда отобразит что находится на облачном репозитории для проверки сделанного

@@ -115,7 +115,8 @@ public class Organization implements Serializable {
         //конструктор (используем его, если мы в данный момент нигде не работаем)
         //конструктор принимает инт старт-года, старт-месяц из Ява-енума, инт конец-года, конец-месяц из Ява-енума,...
         //делает из этого объекты LocalDate и передает в главный конструктор
-        public Position (int startYear, Month startMonth, int endYear, Month endMonth, String title, String description){
+        public Position (int startYear, Month startMonth, int endYear,
+                         Month endMonth, String title, String description){
             this(of(startYear, startMonth), of(endYear, endMonth), title, description);
         }
 
